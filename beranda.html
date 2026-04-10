@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CariMakan.ID</title>
+    <link rel="stylesheet" href="beranda.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>CariMakan.ID</h2>
+        <div>
+            <a href="beranda.html">Beranda</a>
+            <a href="#">Favorit</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Temukan Tempat Makan di Sekitarmu!</h1>
+        <p>Cari berdasarkan lokasi, harga, dan kategori</p>
+
+        <div class="search-box">
+            <input type="text" placeholder="Cari tempat makan...">
+            <select>
+                <option>Harga</option>
+                <option>Murah</option>
+                <option>Sedang</option>
+                <option>Mahal</option>
+            </select>
+            <select>
+                <option>Lokasi</option>
+                <option>Mataram</option>
+                <option>Cakranegara</option>
+                <option>Narmada</option>
+            </select>
+            <select>
+                <option>Kategori</option>
+                <option>Bakso</option>
+                <option>Ayam</option>
+                <option>Seafood</option>
+            </select>
+            <button>Cari</button>
+        </div>
+    </section>
+
+    <section class="container">
+        <h2>Rekomendasi Tempat Makan</h2>
+
+        <div class="card-container">
+
+            <div class="card">
+                <img src="5.mie_ayam.jpeg" alt="">
+                <h3>Mie Ayam Pak Joel</h3>
+                <p>⭐ 4.5 | Mataram</p>
+                <button onclick="favorit()">❤️ Favorit</button>
+            </div>
+
+            <div class="card">
+                <img src="4.bakso.jpeg" alt="">
+                <h3>Bakso Pak Majid</h3>
+                <p>⭐ 4.6 | Cakranegara</p>
+                <button onclick="favorit()">❤️ Favorit</button>
+            </div>
+
+            <div class="card">
+                <img src="1.ayam_geprek.jpeg" alt="">
+                <h3>Ayam Geprek Gembul</h3>
+                <p>⭐ 4.4 | Ampenan</p>
+                <button onclick="favorit()">❤️ Favorit</button>
+            </div>
+
+            <div class="card">
+                <img src="6.sate.jpeg" alt="">
+                <h3>Sate Narmada</h3>
+                <p>⭐ 4.7 | Narmada</p>
+                <button onclick="favorit()">❤️ Favorit</button>
+            </div>
+
+            <div class="card">
+                <img src="2.ayam_taliwang.jpeg" alt="">
+                <h3>Ayam Taliwang</h3>
+                <p>⭐ 4.5 | Ampenan</p>
+                <button onclick="favorit()">❤️ Favorit</button>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class = "footer">© 2026 CariMakan.ID</footer>
+
+    <script src="beranda.js"></script>
+</body>
+</html>
