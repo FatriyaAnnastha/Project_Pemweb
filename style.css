@@ -50,6 +50,7 @@ body {
 }
 .nav-left { display: flex; align-items: center; gap: 14px; }
 .logo { width: 72px; height: auto; }
+.simbol { width: 15px; height: auto; }
 .location {
     background: #f0ece8; padding: 5px 14px;
     border-radius: 20px; font-size: 12.5px;
@@ -80,7 +81,7 @@ body {
 .hero {
     text-align: center; padding: 60px 20px;
     color: white;
-    background: linear-gradient(rgba(10,30,50,0.60), rgba(0,100,40,0.55)),
+    background: linear-gradient(rgba(30, 39, 32, 0.663), rgba(0, 0, 0, 0.918)),
                 url("3.background.jpg") no-repeat center/cover;
     position: relative; overflow: hidden;
 }
