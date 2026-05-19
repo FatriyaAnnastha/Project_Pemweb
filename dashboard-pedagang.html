@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pedagang – CariMakan.ID</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+<body class="pedagang-theme">
+<div id="loading"><img src="7.Logo_CariMakan.png" alt="Logo"><p>Memuat Dashboard…</p></div>
+
+<div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="7.Logo_CariMakan.png" alt="CariMakan">
+            <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;">PANEL PEDAGANG</div>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="#" class="active" onclick="showTab('overview')"><span class="icon">📊</span> Ringkasan</a>
+            <a href="#" onclick="showTab('warung')"><span class="icon">🏪</span> Kelola Warung</a>
+            <a href="#" onclick="showTab('tambah')"><span class="icon">➕</span> Tambah Menu/Warung</a>
+            <a href="#" onclick="showTab('profil')"><span class="icon">👤</span> Profil Saya</a>
+            <a href="beranda.html"><span class="icon">🏠</span> Lihat Beranda</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" onclick="logout()" style="color:rgba(255,255,255,0.4);text-decoration:none;font-size:12px;">🚪 Keluar</a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <header class="main-header">
+            <h1 id="page-title">📊 Ringkasan</h1>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span class="role-badge pedagang">🏪 Pedagang</span>
+                <span id="pedagang-name" style="font-weight:700;font-size:13px;">–</span>
+            </div>
+        </header>
+
+        <div class="main-body">
+
+            <!-- TAB: OVERVIEW -->
+            <div id="tab-overview" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🏪</div>
+                        <div class="stat-info"><h3 id="s-total">0</h3><p>Total Warung</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info"><h3 id="s-aktif">0</h3><p>Warung Aktif</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-info"><h3 id="s-rating">–</h3><p>Rating Rata-rata</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">❤️</div>
+                        <div class="stat-info"><h3 id="s-fav">0</h3><p>Difavoritkan</p></div>
+                    </div>
+                </div>
+
+                <div class="card-panel">
+                    <h2>🏪 Warung Saya</h2>
+                    <div class="card-container" id="my-warung-cards"></div>
+                </div>
+            </div>
+
+            <!-- TAB: KELOLA WARUNG -->
+            <div id="tab-warung" class="tab-content">
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr>
+                            <th>Nama Warung</th><th>Kategori</th><th>Lokasi</th>
+                            <th>Harga</th><th>Rating</th><th>Status</th><th>Aksi</th>
+                        </tr></thead>
+                        <tbody id="warung-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: TAMBAH -->
+            <div id="tab-tambah" class="tab-content">
+                <div class="card-panel" style="max-width:560px;">
+                    <h2>➕ Tambah / Edit Warung</h2>
+                    <h3>Pilih Lokasi Warung</h3>
+                        <div id="map"
+                            style="
+                            height:300px;
+                            width:100%;
+                            border-radius:10px;
+                            margin-bottom:15px;">
+                        <input type="hidden" id="latitude">
+                        </div>
+                        <input type="hidden" id="latitude">
+                        <input type="hidden" id="longitude">
+                    <input type="hidden" id="edit-id">
+                    <div class="form-group">
+                        <label>Nama Warung *</label>
+                        <input type="text" id="f-nama" placeholder="Contoh: Bakso Pak Budi">
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori *</label>
+                        <select id="f-kategori">
+                            <option>Bakso</option><option>Mie Ayam</option><option>Ayam</option>
+                            <option>Sate</option><option>Seafood</option><option>Nasi</option><option>Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Lokasi *</label>
+                        <select id="f-lokasi">
+                            <option>Mataram</option><option>Cakranegara</option>
+                            <option>Ampenan</option><option>Narmada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Kisaran Harga</label>
+                        <select id="f-harga">
+                            <option>Murah</option><option>Sedang</option><option>Mahal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Deskripsi</label>
+                        <textarea id="f-deskripsi" placeholder="Ceritakan tentang warung kamu…"></textarea>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button class="btn btn-primary" onclick="simpanWarung()">💾 Simpan</button>
+                        <button class="btn btn-outline" onclick="resetForm()">✖ Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: PROFIL -->
+            <div id="tab-profil" class="tab-content">
+                <div class="card-panel" style="max-width:440px;">
+                    <h2>👤 Profil Pedagang</h2>
+                    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="p-nama" readonly></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="p-email" readonly></div>
+                    <div class="form-group"><label>Role</label><input type="text" value="Pedagang" readonly></div>
+                    <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Untuk mengubah profil, hubungi admin.</p>
+                </div>
+            </div>
+
+        </div><!-- end main-body -->
+    </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+let currentSession = null;
+
+window.addEventListener('load', () => {
+    currentSession = getSession();
+    if (!currentSession || currentSession.role !== 'pedagang') {
+        window.location.href = 'login.html'; return;
+    }
+    document.getElementById('pedagang-name').textContent = currentSession.nama;
+    document.getElementById('p-nama').value = currentSession.nama;
+    document.getElementById('p-email').value = currentSession.email;
+    renderOverview();
+    renderWarungTable();
+});
+
+function showTab(name) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    const titles = { overview:'📊 Ringkasan', warung:'🏪 Kelola Warung', tambah:'➕ Tambah Warung', profil:'👤 Profil Saya' };
+    document.getElementById('page-title').textContent = titles[name] || '';
+    event.currentTarget.classList.add('active');
+}
+
+function myWarung() {
+    return getWarung().filter(w => w.pedagang === currentSession.toko);
+}
+
+function renderOverview() {
+    const list = myWarung();
+    document.getElementById('s-total').textContent = list.length;
+    document.getElementById('s-aktif').textContent = list.filter(w => w.status === 'aktif').length;
+    const avg = list.length ? (list.reduce((s, w) => s + w.rating, 0) / list.length).toFixed(1) : '–';
+    document.getElementById('s-rating').textContent = avg;
+    // count favorites
+    const favIds = getFavorites().map(f => f.id);
+    document.getElementById('s-fav').textContent = list.filter(w => favIds.includes(w.id)).length;
+
+    const container = document.getElementById('my-warung-cards');
+    if (list.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="big-icon">🏪</div><p>Belum ada warung. <a href="#" onclick="showTab(\'tambah\')" style="color:var(--pedagang-color);font-weight:700;">Tambah sekarang →</a></p></div>';
+        return;
+    }
+    container.innerHTML = list.map(w => `
+        <div class="card">
+            <img src="${w.img}" alt="${w.nama}" onerror="this.src='4.bakso.jpeg'">
+            <div class="card-body">
+                <h3>${w.nama}</h3>
+                <p>⭐ ${w.rating} | ${w.lokasi}</p>
+                <p style="font-size:11.5px;color:#aaa;margin-bottom:8px">${w.status === 'aktif' ? '✅ Aktif' : '⛔ Nonaktif'}</p>
+                <div class="card-actions">
+                    <button class="btn btn-sm btn-primary" onclick="editWarung(${w.id})">✏️ Edit</button>
+                    <button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">${w.status==='aktif'?'⛔ Nonaktifkan':'✅ Aktifkan'}</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderWarungTable() {
+    const list = myWarung();
+    const body = document.getElementById('warung-table-body');
+    body.innerHTML = list.map(w => `
+        <tr>
+            <td><strong>${w.nama}</strong></td>
+            <td>${w.kategori}</td>
+            <td>${w.lokasi}</td>
+            <td>${w.harga}</td>
+            <td>⭐ ${w.rating}</td>
+            <td><span class="badge ${w.status==='aktif'?'badge-green':'badge-red'}">${w.status}</span></td>
+            <td style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-warning" onclick="editWarung(${w.id})">✏️</button>
+                <button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">${w.status==='aktif'?'⛔':'✅'}</button>
+                <button class="btn btn-sm" style="background:#fdecea;color:#e74c3c;" onclick="hapusWarung(${w.id})">🗑️</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">Belum ada warung terdaftar</td></tr>';
+}
+
+function editWarung(id) {
+    const w = getWarung().find(x => x.id === id);
+    if (!w) return;
+    document.getElementById('edit-id').value = id;
+    document.getElementById('f-nama').value = w.nama;
+    document.getElementById('f-kategori').value = w.kategori;
+    document.getElementById('f-lokasi').value = w.lokasi;
+    document.getElementById('f-harga').value = w.harga;
+    document.getElementById('f-deskripsi').value = w.deskripsi || '';
+    showTab('tambah');
+}
+
+function simpanWarung(){
+
+    const namaWarung =
+    document.getElementById('namaWarung').value;
+
+    const latitude =
+    document.getElementById('latitude').value;
+
+    const longitude =
+    document.getElementById('longitude').value;
+
+    if(!namaWarung || !latitude || !longitude){
+
+        alert("Pilih lokasi warung!");
+
+        return;
+    }
+
+    const session =
+    JSON.parse(localStorage.getItem('session'));
+
+    let warung =
+    JSON.parse(localStorage.getItem('warung')) || [];
+
+    warung.push({
+
+        id: Date.now(),
+
+        nama: namaWarung,
+
+        owner: session.nama,
+
+        lat: latitude,
+
+        lng: longitude,
+
+        status: 'aktif'
+
+    });
+
+    localStorage.setItem(
+        'warung',
+        JSON.stringify(warung)
+    );
+
+    alert("Warung berhasil ditambahkan!");
+
+}
+
+function resetForm() {
+    document.getElementById('edit-id').value = '';
+    document.getElementById('f-nama').value = '';
+    document.getElementById('f-deskripsi').value = '';
+}
+
+function toggleStatus(id) {
+    let list = getWarung();
+    list = list.map(w => w.id === id ? { ...w, status: w.status === 'aktif' ? 'nonaktif' : 'aktif' } : w);
+    saveWarung(list);
+    renderOverview();
+    renderWarungTable();
+    showToast('Status warung diperbarui!');
+}
+
+function hapusWarung(id) {
+    if (!confirm('Hapus warung ini?')) return;
+    saveWarung(getWarung().filter(w => w.id !== id));
+    renderOverview();
+    renderWarungTable();
+    showToast('🗑️ Warung dihapus!');
+}
+
+</script>
+
+<script async src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
+<script>
+let map;
+let marker;
+
+function initMap(){
+
+    // default lokasi Mataram
+    const posisiAwal = {
+        lat: -8.5831,
+        lng: 116.1165
+    };
+
+    map = new google.maps.Map(
+        document.getElementById("map"),
+        {
+            zoom: 13,
+            center: posisiAwal
+        }
+    );
+
+    // klik map
+    map.addListener("click", (e) => {
+
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+
+        // simpan koordinat
+        document.getElementById("latitude").value = lat;
+        document.getElementById("longitude").value = lng;
+
+        // hapus marker lama
+        if(marker){
+            marker.setMap(null);
+        }
+
+        // tambah marker baru
+        marker = new google.maps.Marker({
+            position: {
+                lat: lat,
+                lng: lng
+            },
+            map: map
+        });
+
+    });
+
+}
+</script>
+<script async
+src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+</script>
+</body>
+</html>

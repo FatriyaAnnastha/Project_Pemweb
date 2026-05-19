@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorit – CariMakan.ID</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="loading"><img src="7.Logo_CariMakan.png" alt="Logo"><p>Memuat…</p></div>
+
+<nav class="navbar">
+    <div class="nav-left">
+        <img src="7.Logo_CariMakan.png" class="logo" alt="CariMakan">
+        <div class="location">📍 <span id="lokasi-text">Mendeteksi…</span></div>
+    </div>
+    <div class="nav-right">
+        <a href="beranda.html">🏠 Beranda</a>
+        <a href="favorit.html" class="active">❤️ Favorit</a>
+        <a href="#" onclick="if(getSession()){logout()}else{location.href='login.html'}">
+            👤 <span id="auth-label">Login</span>
+        </a>
+    </div>
+</nav>
+
+<section class="container">
+    <h2 class="section-title">❤️ Daftar <span>Favorit</span> Saya</h2>
+    <div class="card-container" id="fav-list"></div>
+</section>
+
+<footer>© 2026 <span>CariMakan.ID</span> — Temukan Kelezatan Lokal</footer>
+
+<script src="app.js"></script>
+<script>
+window.addEventListener('load', () => {
+    const s = getSession();
+    if (s) document.getElementById('auth-label').textContent = 'Logout';
+    renderFavorit();
+});
+
+function renderFavorit() {
+    const favIds = getFavorites().map(f => f.id);
+    const list = getWarung().filter(w => favIds.includes(w.id));
+    const container = document.getElementById('fav-list');
+    if (list.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="big-icon">💔</div><p>Belum ada tempat makan di favorit kamu.<br><a href="beranda.html" style="color:var(--primary);font-weight:700;">Cari sekarang →</a></p></div>';
+        return;
+    }
+    container.innerHTML = list.map(w => `
+        <div class="card">
+            <img src="${w.img}" alt="${w.nama}" onerror="this.src='4.bakso.jpeg'">
+            <div class="card-body">
+                <h3>${w.nama}</h3>
+                <p>⭐ ${w.rating} | ${w.lokasi}</p>
+                <p style="font-size:11.5px;color:#aaa;margin-bottom:6px">${w.kategori} • ${w.harga}</p>
+                <div class="card-actions">
+                    <button class="btn btn-sm btn-primary" data-fav-id="${w.id}"
+                        onclick="toggleFavorit(${w.id},'${w.nama}');renderFavorit()">❤️ Hapus</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+</script>
+</body>
+</html>

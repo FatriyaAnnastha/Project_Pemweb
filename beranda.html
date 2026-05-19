@@ -3,93 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CariMakan.ID</title>
-    <link rel="stylesheet" href="beranda.css">
+    <title>Beranda – CariMakan.ID</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="loading">
+    <img src="7.Logo_CariMakan.png" alt="Logo">
+    <p>Memuat…</p>
+</div>
 
-    <nav class="navbar">
-        <h2>CariMakan.ID</h2>
-        <div>
-            <a href="beranda.html">Beranda</a>
-            <a href="#">Favorit</a>
-            <a href="login.html">Login</a>
+<nav class="navbar">
+    <div class="nav-left">
+        <img src="7.Logo_CariMakan.png" class="logo" alt="CariMakan">
+        <div class="location">
+            📍 <span id="lokasi-text">Mendeteksi…</span>
         </div>
-    </nav>
+    </div>
+    <div class="nav-right">
+        <a href="beranda.html" class="active">🏠 Beranda</a>
+        <a href="favorit.html">❤️ Favorit</a>
 
-    <section class="hero">
-        <h1>Temukan Tempat Makan di Sekitarmu!</h1>
-        <p>Cari berdasarkan lokasi, harga, dan kategori</p>
+        <!-- DASHBOARD DINAMIS -->
+        <a href="#" id="dashboard-link" style="display:none;">📊 Dashboard</a>
 
-        <div class="search-box">
-            <input type="text" placeholder="Cari tempat makan...">
-            <select>
-                <option>Harga</option>
-                <option>Murah</option>
-                <option>Sedang</option>
-                <option>Mahal</option>
-            </select>
-            <select>
-                <option>Lokasi</option>
-                <option>Mataram</option>
-                <option>Cakranegara</option>
-                <option>Narmada</option>
-            </select>
-            <select>
-                <option>Kategori</option>
-                <option>Bakso</option>
-                <option>Ayam</option>
-                <option>Seafood</option>
-            </select>
-            <button>Cari</button>
+        <span class="role-badge user" id="user-name">Tamu</span>
+        <a href="#" onclick="handleAuth()">👤 <span id="auth-label">Login</span></a>
+    </div>
+</nav>
+
+<section class="hero">
+    <h1>Temukan Tempat Makan di Sekitarmu!</h1>
+    <p>Cari berdasarkan lokasi, harga, dan kategori favorit kamu</p>
+    <div class="search-box">
+        <input type="text" id="q" placeholder="🔍 Cari tempat makan...">
+        <select id="filter-harga">
+            <option value="">Semua Harga</option>
+            <option>Murah</option>
+            <option>Sedang</option>
+            <option>Mahal</option>
+        </select>
+        <select id="filter-lokasi">
+            <option value="">Semua Lokasi</option>
+            <option>Mataram</option>
+            <option>Cakranegara</option>
+            <option>Ampenan</option>
+            <option>Narmada</option>
+        </select>
+        <select id="filter-kategori">
+            <option value="">Semua Kategori</option>
+            <option>Bakso</option>
+            <option>Mie Ayam</option>
+            <option>Ayam</option>
+            <option>Sate</option>
+            <option>Seafood</option>
+        </select>
+        <button onclick="renderWarung()">Cari 🔍</button>
+    </div>
+</section>
+
+<section class="container">
+    <h2 class="section-title">🍽️ Rekomendasi <span>Tempat Makan</span></h2>
+    <div class="card-container" id="warung-list">
+        <!-- cards injected by JS -->
+    </div>
+</section>
+
+<footer>© 2026 <span>CariMakan.ID</span> — Temukan Kelezatan Lokal</footer>
+
+<script src="app.js"></script>
+<script>
+
+window.addEventListener('load', () => {
+    const s = getSession();
+
+    if (s) {
+        document.getElementById('user-name').textContent = s.nama;
+        document.getElementById('auth-label').textContent = 'Logout';
+
+        const dashboardLink = document.getElementById('dashboard-link');
+
+        dashboardLink.style.display = 'inline-block';
+
+        if (s.role === 'admin') {
+            dashboardLink.href = 'dashboard-admin.html';
+        } 
+        else if (s.role === 'pedagang') {
+            dashboardLink.href = 'dashboard-pedagang.html';
+        } 
+        else {
+            dashboardLink.href = 'beranda.html';
+        }
+    }
+
+    renderWarung();
+});
+
+function handleAuth() {
+    if (getSession()) { logout(); } else { window.location.href = 'login.html'; }
+}
+
+function renderWarung() {
+
+    const q =
+    document.getElementById('q')
+    .value.toLowerCase();
+
+    const harga =
+    document.getElementById('filter-harga').value;
+
+    const lokasi =
+    document.getElementById('filter-lokasi').value;
+
+    const kat =
+    document.getElementById('filter-kategori').value;
+
+    let list =
+    getWarung().filter(w => w.status === 'aktif');
+
+    // SEARCH
+    if (q){
+        list = list.filter(w =>
+            w.nama.toLowerCase().includes(q) ||
+            w.kategori.toLowerCase().includes(q)
+        );
+    }
+
+    // FILTER HARGA
+    if (harga){
+        list = list.filter(w =>
+            w.harga === harga
+        );
+    }
+
+    // FILTER LOKASI
+    if (lokasi){
+        list = list.filter(w =>
+            w.lokasi === lokasi
+        );
+    }
+
+    // FILTER KATEGORI
+    if (kat){
+        list = list.filter(w =>
+            w.kategori === kat
+        );
+    }
+
+    const container =
+    document.getElementById('warung-list');
+
+    // JIKA KOSONG
+    if (list.length === 0) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+
+                <div class="big-icon">
+                    🍽️
+                </div>
+
+                <p>
+                    Tidak ada tempat makan yang ditemukan.
+                </p>
+
+            </div>
+        `;
+
+        return;
+    }
+
+    // TAMPILKAN DATA
+    container.innerHTML = list.map(w => `
+
+        <div class="card">
+
+            <img
+                src="${w.img}"
+                alt="${w.nama}"
+                onerror="this.src='4.bakso.jpeg'"
+            >
+
+            <div class="card-body">
+
+                <h3>${w.nama}</h3>
+
+                <p>
+                    ⭐ ${w.rating} |
+                    ${w.lokasi}
+                </p>
+
+                <p
+                    style="
+                    font-size:11.5px;
+                    color:#aaa;
+                    margin-bottom:6px
+                    "
+                >
+                    ${w.kategori} • ${w.harga}
+                </p>
+
+                <div class="card-actions">
+
+    <!-- FAVORIT -->
+    <button
+        class="btn btn-sm
+        ${isFavorit(w.id)
+        ? 'btn-primary'
+        : 'btn-outline'}"
+
+        data-fav-id="${w.id}"
+
+        onclick="
+        toggleFavorit(
+            ${w.id},
+            '${w.nama}'
+        )"
+    >
+        ❤️ Favorit
+    </button>
+
+    <!-- LOKASI -->
+    <a
+        href="https://www.google.com/maps?q=${w.lat},${w.lng}"
+        target="_blank"
+        class="btn btn-sm btn-primary"
+        style="
+            text-decoration:none;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:5px;
+        "
+    >
+        📍 Lokasi
+    </a>
+
+</div>
+
+            </div>
+
         </div>
-    </section>
 
-    <section class="container">
-        <h2>Rekomendasi Tempat Makan</h2>
+    `).join('');
 
-        <div class="card-container">
-
-            <div class="card">
-                <img src="5.mie_ayam.jpeg" alt="">
-                <h3>Mie Ayam Pak Joel</h3>
-                <p>⭐ 4.5 | Mataram</p>
-                <button onclick="favorit()">❤️ Favorit</button>
-            </div>
-
-            <div class="card">
-                <img src="4.bakso.jpeg" alt="">
-                <h3>Bakso Pak Majid</h3>
-                <p>⭐ 4.6 | Cakranegara</p>
-                <button onclick="favorit()">❤️ Favorit</button>
-            </div>
-
-            <div class="card">
-                <img src="1.ayam_geprek.jpeg" alt="">
-                <h3>Ayam Geprek Gembul</h3>
-                <p>⭐ 4.4 | Ampenan</p>
-                <button onclick="favorit()">❤️ Favorit</button>
-            </div>
-
-            <div class="card">
-                <img src="6.sate.jpeg" alt="">
-                <h3>Sate Narmada</h3>
-                <p>⭐ 4.7 | Narmada</p>
-                <button onclick="favorit()">❤️ Favorit</button>
-            </div>
-
-            <div class="card">
-                <img src="2.ayam_taliwang.jpeg" alt="">
-                <h3>Ayam Taliwang</h3>
-                <p>⭐ 4.5 | Ampenan</p>
-                <button onclick="favorit()">❤️ Favorit</button>
-            </div>
-
-        </div>
-    </section>
-
-    <footer class = "footer">© 2026 CariMakan.ID</footer>
-
-    <script src="beranda.js"></script>
+}
+</script>
 </body>
 </html>
