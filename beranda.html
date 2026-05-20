@@ -6,51 +6,87 @@
     <title>Beranda – CariMakan.ID</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
 <div id="loading">
     <img src="7.Logo_CariMakan.png" alt="Logo">
     <p>Memuat…</p>
 </div>
 
+<!-- MODAL DETAIL WARUNG -->
+<div class="modal-overlay" id="modal-detail">
+    <div class="modal-box">
+        <button class="modal-close" onclick="tutupModal()">✕</button>
+        <div id="modal-content"></div>
+    </div>
+</div>
+
+<!-- NAVBAR -->
 <nav class="navbar">
+
     <div class="nav-left">
         <img src="7.Logo_CariMakan.png" class="logo" alt="CariMakan">
+
         <div class="location">
             <img src="8.Logo lokasi.png" class="simbol" alt="lokasi">
             <span id="lokasi-text">Mendeteksi…</span>
         </div>
     </div>
+
     <div class="nav-right">
-        <a href="beranda.html" class="active"> Beranda</a>
-        <a href="favorit.html"> Favorit</a>
+        <a href="beranda.html" class="active">Beranda</a>
+        <a href="favorit.html">Favorit</a>
 
-        <!-- DASHBOARD DINAMIS -->
-        <a href="#" id="dashboard-link" style="display:none;"> Dashboard</a>
+        <a href="#" id="dashboard-link" style="display:none;">
+            Dashboard
+        </a>
 
-        <span class="role-badge user" id="user-name">Tamu</span>
-        <a href="#" onclick="handleAuth()">👤 <span id="auth-label">Login</span></a>
+        <span class="role-badge user" id="user-name">
+            Tamu
+        </span>
+
+        <a href="#" onclick="handleAuth()">
+            👤 <span id="auth-label">Login</span>
+        </a>
     </div>
+
 </nav>
 
+<!-- HERO -->
 <section class="hero">
+
     <h1>Temukan Tempat Makan di Sekitarmu!</h1>
-    <p>Cari berdasarkan lokasi, harga, dan kategori favorit kamu</p>
+
+    <p>
+        Cari berdasarkan lokasi, harga, dan kategori favorit kamu
+    </p>
+
     <div class="search-box">
-        <input type="text" id="q" placeholder="🔍 Cari tempat makan...">
-        <select id="filter-harga">
+
+        <input
+            type="text"
+            id="q"
+            placeholder="🔍 Cari tempat makan..."
+            onkeyup="renderWarung()"
+        >
+
+        <select id="filter-harga" onchange="renderWarung()">
             <option value="">Semua Harga</option>
             <option>Murah</option>
             <option>Sedang</option>
             <option>Mahal</option>
         </select>
-        <select id="filter-lokasi">
+
+        <select id="filter-lokasi" onchange="renderWarung()">
             <option value="">Semua Lokasi</option>
             <option>Mataram</option>
             <option>Cakranegara</option>
             <option>Ampenan</option>
             <option>Narmada</option>
         </select>
-        <select id="filter-kategori">
+
+        <select id="filter-kategori" onchange="renderWarung()">
             <option value="">Semua Kategori</option>
             <option>Bakso</option>
             <option>Mie Ayam</option>
@@ -58,27 +94,57 @@
             <option>Sate</option>
             <option>Seafood</option>
         </select>
-        <button onclick="renderWarung()">Cari 🔍</button>
+
+        <button onclick="renderWarung()">
+            Cari 🔍
+        </button>
+
     </div>
+
 </section>
 
+<!-- CONTENT -->
 <section class="container">
-    <h2 class="section-title">🍽️ Rekomendasi <span>Tempat Makan</span></h2>
-    <div class="card-container" id="warung-list">
-        <!-- cards injected by JS -->
+
+    <h2 class="section-title">
+        🍽️ Rekomendasi <span>Tempat Makan</span>
+    </h2>
+
+    <div
+        id="last-updated"
+        style="font-size:11px;color:#aaa;margin-bottom:12px;display:none;"
+    >
+        🔄 Data diperbarui:
+        <span id="updated-time"></span>
     </div>
+
+    <div class="card-container" id="warung-list"></div>
+
 </section>
 
-<footer>© 2026 <span>CariMakan.ID</span> — Temukan Kelezatan Lokal</footer>
+<!-- FOOTER -->
+<footer>
+    © 2026 <span>CariMakan.ID</span>
+    — Temukan Kelezatan Lokal
+</footer>
 
+<!-- JS EKSTERNAL -->
 <script src="app.js"></script>
+
 <script>
 
+/* =========================
+   INISIALISASI
+========================= */
+
 window.addEventListener('load', () => {
+
     const s = getSession();
 
     if (s) {
+
         document.getElementById('user-name').textContent = s.nama;
+
         document.getElementById('auth-label').textContent = 'Logout';
 
         const dashboardLink = document.getElementById('dashboard-link');
@@ -86,100 +152,353 @@ window.addEventListener('load', () => {
         dashboardLink.style.display = 'inline-block';
 
         if (s.role === 'admin') {
+
             dashboardLink.href = 'dashboard-admin.html';
-        } 
-        else if (s.role === 'pedagang') {
-            dashboardLink.href = 'dashboard-pedagang.html';
-        } 
-        else {
-            dashboardLink.href = 'beranda.html';
+
         }
+
+        else if (s.role === 'pedagang') {
+
+            dashboardLink.href = 'dashboard-pedagang.html';
+
+        }
+
+        else {
+
+            dashboardLink.href = 'beranda.html';
+
+        }
+
     }
 
     renderWarung();
+
+    detectLokasi();
+
 });
 
-function handleAuth() {
-    if (getSession()) { logout(); } else { window.location.href = 'login.html'; }
+
+/* =========================
+   AUTO REFRESH
+========================= */
+
+window.addEventListener('storage', (e) => {
+
+    if (e.key === 'cm_warung') {
+
+        renderWarung();
+
+        tampilkanWaktuUpdate();
+
+    }
+
+});
+
+
+function tampilkanWaktuUpdate() {
+
+    const jam = new Date().toLocaleTimeString(
+        'id-ID',
+        {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        }
+    );
+
+    document.getElementById('last-updated').style.display = 'block';
+
+    document.getElementById('updated-time').textContent = jam;
+
 }
+
+
+/* =========================
+   DETEKSI LOKASI
+========================= */
+
+function detectLokasi() {
+
+    if (!navigator.geolocation) {
+
+        document.getElementById('lokasi-text').textContent =
+            'Lokasi tidak tersedia';
+
+        return;
+
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        () => {
+
+            document.getElementById('lokasi-text').textContent =
+                'Lokasi ditemukan';
+
+        },
+
+        () => {
+
+            document.getElementById('lokasi-text').textContent =
+                'Mataram, NTB';
+
+        }
+
+    );
+
+}
+
+
+/* =========================
+   LOGIN / LOGOUT
+========================= */
+
+function handleAuth() {
+
+    if (getSession()) {
+
+        logout();
+
+    }
+
+    else {
+
+        window.location.href = 'login.html';
+
+    }
+
+}
+
+
+/* =========================
+   STATUS BUKA / TUTUP
+========================= */
+
+function cekStatusBuka(w) {
+
+    if (
+        !w.jamBuka ||
+        !w.jamTutup ||
+        !w.hariKerja ||
+        w.hariKerja.length === 0
+    ) {
+        return null;
+    }
+
+    const now = new Date();
+
+    const hari = [
+        'Min',
+        'Sen',
+        'Sel',
+        'Rab',
+        'Kam',
+        'Jum',
+        'Sab'
+    ][now.getDay()];
+
+    const hm =
+        now.getHours() * 60 +
+        now.getMinutes();
+
+    const [bh, bm] =
+        w.jamBuka.split(':').map(Number);
+
+    const [th, tm] =
+        w.jamTutup.split(':').map(Number);
+
+    const buka =
+        bh * 60 + bm;
+
+    const tutup =
+        th * 60 + tm;
+
+    const hariMatch =
+        w.hariKerja.includes(hari);
+
+    const jamMatch =
+        hm >= buka && hm <= tutup;
+
+    return hariMatch && jamMatch;
+
+}
+
+
+/* =========================
+   RENDER WARUNG
+========================= */
 
 function renderWarung() {
 
     const q =
-    document.getElementById('q')
-    .value.toLowerCase();
+        document.getElementById('q')
+        .value
+        .toLowerCase()
+        .trim();
 
     const harga =
-    document.getElementById('filter-harga').value;
+        document.getElementById('filter-harga').value;
 
     const lokasi =
-    document.getElementById('filter-lokasi').value;
+        document.getElementById('filter-lokasi').value;
 
     const kat =
-    document.getElementById('filter-kategori').value;
+        document.getElementById('filter-kategori').value;
 
     let list =
-    getWarung().filter(w => w.status === 'aktif');
+        getWarung().filter(w => w.status === 'aktif');
 
-    // SEARCH
-    if (q){
+    if (q) {
+
         list = list.filter(w =>
+
             w.nama.toLowerCase().includes(q) ||
-            w.kategori.toLowerCase().includes(q)
+
+            w.kategori.toLowerCase().includes(q) ||
+
+            (
+                w.deskripsi &&
+                w.deskripsi.toLowerCase().includes(q)
+            )
+
         );
+
     }
 
-    // FILTER HARGA
-    if (harga){
-        list = list.filter(w =>
-            w.harga === harga
-        );
+    if (harga) {
+
+        list = list.filter(w => w.harga === harga);
+
     }
 
-    // FILTER LOKASI
-    if (lokasi){
-        list = list.filter(w =>
-            w.lokasi === lokasi
-        );
+    if (lokasi) {
+
+        list = list.filter(w => w.lokasi === lokasi);
+
     }
 
-    // FILTER KATEGORI
-    if (kat){
-        list = list.filter(w =>
-            w.kategori === kat
-        );
+    if (kat) {
+
+        list = list.filter(w => w.kategori === kat);
+
     }
 
     const container =
-    document.getElementById('warung-list');
+        document.getElementById('warung-list');
 
-    // JIKA KOSONG
     if (list.length === 0) {
 
         container.innerHTML = `
             <div class="empty-state">
-
-                <div class="big-icon">
-                    🍽️
-                </div>
-
-                <p>
-                    Tidak ada tempat makan yang ditemukan.
-                </p>
-
+                <div class="big-icon">🍽️</div>
+                <p>Tidak ada tempat makan yang ditemukan.</p>
             </div>
         `;
 
         return;
+
     }
 
-    // TAMPILKAN DATA
-    container.innerHTML = list.map(w => `
+    container.innerHTML = list.map(w => {
 
-        <div class="card">
+        const lokasiUrl =
+            (w.lat && w.lng)
+
+            ? `https://www.google.com/maps?q=${w.lat},${w.lng}`
+
+            : `https://www.google.com/maps/search/${encodeURIComponent(w.nama + ' ' + w.lokasi)}`;
+
+        const sudahFavorit =
+            isFavorit(w.id);
+
+        const statusBuka =
+            cekStatusBuka(w);
+
+        let chipStatus = '';
+
+        if (statusBuka === true) {
+
+            chipStatus =
+                `<span class="info-chip chip-buka">🟢 Buka</span>`;
+
+        }
+
+        else if (statusBuka === false) {
+
+            chipStatus =
+                `<span class="info-chip chip-tutup">🔴 Tutup</span>`;
+
+        }
+
+        let chipJam = '';
+
+        if (w.jamBuka && w.jamTutup) {
+
+            chipJam =
+                `<span class="info-chip">🕐 ${w.jamBuka}–${w.jamTutup}</span>`;
+
+        }
+
+        let chipHari = '';
+
+        if (w.hariKerja && w.hariKerja.length > 0) {
+
+            chipHari =
+                `<span class="info-chip">📅 ${w.hariKerja.join(', ')}</span>`;
+
+        }
+
+        let chipWA = '';
+
+        if (w.wa) {
+
+            chipWA =
+                `<a href="https://wa.me/62${w.wa.replace(/^0/, '')}"
+                    target="_blank"
+                    class="info-chip chip-wa">
+                    💬 WhatsApp
+                </a>`;
+
+        }
+
+        let previewMenu = '';
+
+        if (w.menu && w.menu.length > 0) {
+
+            const tampil = w.menu
+                .slice(0, 2)
+                .map(m => `
+                    <span style="font-size:11px;color:#888;">
+                        ${m.nama}
+                        ${m.harga
+                            ? ' – Rp' + Number(m.harga).toLocaleString('id-ID')
+                            : ''}
+                    </span>
+                `)
+                .join('<br>');
+
+            const sisanya =
+                w.menu.length > 2
+                ? `<span style="font-size:11px;color:#aaa;">
+                    +${w.menu.length - 2} menu lainnya
+                   </span>`
+                : '';
+
+            previewMenu = `
+                <div style="margin:4px 0 8px;line-height:1.8;">
+                    ${tampil}
+                    ${sisanya ? '<br>' + sisanya : ''}
+                </div>
+            `;
+
+        }
+
+        return `
+
+        <div class="card" id="card-${w.id}">
 
             <img
-                src="${w.img}"
+                src="${w.img || '4.bakso.jpeg'}"
                 alt="${w.nama}"
                 onerror="this.src='4.bakso.jpeg'"
             >
@@ -188,66 +507,304 @@ function renderWarung() {
 
                 <h3>${w.nama}</h3>
 
-                <p>
-                    ⭐ ${w.rating} |
-                    ${w.lokasi}
-                </p>
+                <p>⭐ ${w.rating || 0} | ${w.lokasi}</p>
 
-                <p
-                    style="
-                    font-size:11.5px;
-                    color:#aaa;
-                    margin-bottom:6px
-                    "
-                >
+                <p style="font-size:11.5px;color:#aaa;margin-bottom:4px;">
                     ${w.kategori} • ${w.harga}
                 </p>
 
+                <div class="info-strip">
+                    ${chipStatus}
+                    ${chipJam}
+                    ${chipHari}
+                    ${chipWA}
+                </div>
+
+                ${previewMenu}
+
                 <div class="card-actions">
 
-    <!-- FAVORIT -->
-    <button
-        class="btn btn-sm
-        ${isFavorit(w.id)
-        ? 'btn-primary'
-        : 'btn-outline'}"
+                    <button
+                        class="btn btn-sm btn-outline"
+                        onclick="bukaDetail(${w.id})"
+                    >
+                        📋 Detail
+                    </button>
 
-        data-fav-id="${w.id}"
+                    <button
+                        class="btn btn-sm ${sudahFavorit ? 'btn-primary' : 'btn-outline'}"
+                        id="fav-btn-${w.id}"
+                        onclick="toggleFavoritDanUpdate(${w.id}, '${w.nama}')"
+                    >
+                        ❤️ ${sudahFavorit ? 'Difavoritkan' : 'Favorit'}
+                    </button>
 
-        onclick="
-        toggleFavorit(
-            ${w.id},
-            '${w.nama}'
-        )"
-    >
-        ❤️ Favorit
-    </button>
+                    <a
+                        href="${lokasiUrl}"
+                        target="_blank"
+                        class="btn btn-sm btn-primary"
+                        style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;"
+                    >
+                        📍 Lokasi
+                    </a>
 
-    <!-- LOKASI -->
-    <a
-        href="https://www.google.com/maps?q=${w.lat},${w.lng}"
-        target="_blank"
-        class="btn btn-sm btn-primary"
-        style="
-            text-decoration:none;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:5px;
-        "
-    >
-        📍 Lokasi
-    </a>
-
-</div>
+                </div>
 
             </div>
 
         </div>
 
-    `).join('');
+        `;
+
+    }).join('');
 
 }
+
+
+/* =========================
+   MODAL DETAIL
+========================= */
+
+function bukaDetail(id) {
+
+    const w =
+        getWarung().find(x => x.id === id);
+
+    if (!w) return;
+
+    const statusBuka =
+        cekStatusBuka(w);
+
+    const statusTeks =
+        statusBuka === true
+
+        ? '<span class="status-buka">🟢 Sedang Buka</span>'
+
+        : statusBuka === false
+
+        ? '<span class="status-tutup">🔴 Sedang Tutup</span>'
+
+        : '';
+
+    const lokasiUrl =
+        (w.lat && w.lng)
+
+        ? `https://www.google.com/maps?q=${w.lat},${w.lng}`
+
+        : `https://www.google.com/maps/search/${encodeURIComponent(w.nama + ' ' + w.lokasi)}`;
+
+    const menuHtml =
+        (w.menu && w.menu.length > 0)
+
+        ? `
+        <table class="modal-menu-table">
+
+            <thead>
+                <tr>
+                    <th>Menu</th>
+                    <th>Harga</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                ${w.menu.map(m => `
+                    <tr>
+                        <td>${m.nama}</td>
+                        <td>
+                            ${m.harga
+                                ? 'Rp ' + Number(m.harga).toLocaleString('id-ID')
+                                : '–'}
+                        </td>
+                    </tr>
+                `).join('')}
+
+            </tbody>
+
+        </table>
+        `
+
+        : `
+        <p style="color:#aaa;font-size:13px;">
+            Belum ada menu tersedia.
+        </p>
+        `;
+
+    const hariHtml =
+        (w.hariKerja && w.hariKerja.length > 0)
+
+        ? w.hariKerja.join(', ')
+
+        : '–';
+
+    const waHtml =
+        w.wa
+
+        ? `
+        <a
+            href="https://wa.me/62${w.wa.replace(/^0/,'')}"
+            target="_blank"
+            style="color:#1565c0;"
+        >
+            💬 Chat WhatsApp (${w.wa})
+        </a>
+        `
+
+        : '–';
+
+    document.getElementById('modal-content').innerHTML = `
+
+        <img
+            src="${w.img || '4.bakso.jpeg'}"
+            alt="${w.nama}"
+            onerror="this.src='4.bakso.jpeg'"
+            style="width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:14px;"
+        >
+
+        <h2 style="margin:0 0 4px;">
+            ${w.nama}
+        </h2>
+
+        <p style="color:#888;font-size:13px;margin:0 0 10px;">
+            ${w.kategori} • ${w.harga} • ${w.lokasi}
+        </p>
+
+        ${statusTeks ? `<p style="margin:0 0 10px;">${statusTeks}</p>` : ''}
+
+        ${w.deskripsi
+            ? `<p style="font-size:13px;color:#555;margin:0 0 12px;">
+                ${w.deskripsi}
+               </p>`
+            : ''
+        }
+
+        <div
+            style="
+                display:flex;
+                flex-direction:column;
+                gap:6px;
+                font-size:13px;
+                margin-bottom:14px;
+            "
+        >
+
+            <div>
+                🕐 <strong>Jam Buka:</strong>
+                ${w.jamBuka || '–'} – ${w.jamTutup || '–'}
+            </div>
+
+            <div>
+                📅 <strong>Hari Buka:</strong>
+                ${hariHtml}
+            </div>
+
+            <div>
+                📞 <strong>Kontak:</strong>
+                ${waHtml}
+            </div>
+
+            <div>
+                ⭐ <strong>Rating:</strong>
+                ${w.rating || 0}
+            </div>
+
+        </div>
+
+        <h4 style="margin:0 0 6px;">
+            🍽️ Menu
+        </h4>
+
+        ${menuHtml}
+
+        <div style="display:flex;gap:10px;margin-top:16px;">
+
+            <a
+                href="${lokasiUrl}"
+                target="_blank"
+                class="btn btn-primary"
+                style="text-decoration:none;flex:1;text-align:center;"
+            >
+                📍 Lihat di Maps
+            </a>
+
+            ${w.wa
+                ? `
+                <a
+                    href="https://wa.me/62${w.wa.replace(/^0/,'')}"
+                    target="_blank"
+                    class="btn btn-outline"
+                    style="text-decoration:none;flex:1;text-align:center;"
+                >
+                    💬 WhatsApp
+                </a>
+                `
+                : ''
+            }
+
+        </div>
+
+    `;
+
+    document
+        .getElementById('modal-detail')
+        .classList.add('open');
+
+}
+
+
+function tutupModal() {
+
+    document
+        .getElementById('modal-detail')
+        .classList.remove('open');
+
+}
+
+
+/* =========================
+   TUTUP MODAL KLIK LUAR
+========================= */
+
+document
+.getElementById('modal-detail')
+.addEventListener('click', function(e) {
+
+    if (e.target === this) {
+
+        tutupModal();
+
+    }
+
+});
+
+
+/* =========================
+   FAVORIT
+========================= */
+
+function toggleFavoritDanUpdate(id, nama) {
+
+    toggleFavorit(id, nama);
+
+    const btn =
+        document.getElementById('fav-btn-' + id);
+
+    if (!btn) return;
+
+    const sudahFavorit =
+        isFavorit(id);
+
+    btn.className =
+        'btn btn-sm ' +
+        (sudahFavorit ? 'btn-primary' : 'btn-outline');
+
+    btn.innerHTML =
+        '❤️ ' +
+        (sudahFavorit ? 'Difavoritkan' : 'Favorit');
+
+}
+
 </script>
+
 </body>
 </html>
