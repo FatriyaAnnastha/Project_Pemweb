@@ -53,9 +53,6 @@ Pengguna dapat melihat detail tempat makan seperti menu, harga, rating, jam oper
 5. XAMPP/SQL
 
 ## Site Map
-
-
-
-
+![Sitemap](sitemapCariMakan.jpg)
 
 ## DBMS
