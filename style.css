@@ -48,9 +48,12 @@ body {
     position: sticky; top: 0; z-index: 100;
     box-shadow: 0 2px 12px rgba(0,0,0,0.07);
 }
+
 .nav-left { display: flex; align-items: center; gap: 14px; }
 .logo { width: 72px; height: auto; }
-.simbol { width: 15px; height: auto; }
+.simbol { width: 20px; height: auto; }
+.cari {width: 22px; height: auto;}
+
 .location {
     background: #f0ece8; padding: 5px 14px;
     border-radius: 20px; font-size: 12.5px;
@@ -82,7 +85,7 @@ body {
     text-align: center; padding: 60px 20px;
     color: white;
     background: linear-gradient(rgba(30, 39, 32, 0.663), rgba(0, 0, 0, 0.918)),
-                url("3.background.jpg") no-repeat center/cover;
+                url("assets/2.background.jpg") no-repeat center/cover;
     position: relative; overflow: hidden;
 }
 .hero::after {
@@ -102,12 +105,20 @@ body {
     max-width: 780px; margin: 0 auto;
     border: 1px solid rgba(255,255,255,0.2);
 }
-.search-box input, .search-box select {
+.search-box select {
     padding: 10px 14px; border-radius: 8px; border: none;
     font-family: 'Poppins', sans-serif; font-size: 13px;
     background: white; color: var(--text); outline: none;
     min-width: 140px; flex: 1;
 }
+
+.search-box input{
+    padding: 10px 14px; border-radius: 8px; border: none;
+    font-family: 'Poppins', sans-serif; font-size: 13px;
+    background: white; color: var(--text); outline: none;
+    min-width: 140px; flex: 1;
+}
+
 .search-box button {
     padding: 10px 24px; background: var(--primary);
     color: white; border: none; border-radius: 8px;
@@ -166,7 +177,7 @@ footer span { color: var(--primary); font-weight: 700; }
     min-height: 100vh;
     display: flex; justify-content: center; align-items: center;
     background: linear-gradient(rgba(10,30,50,0.65), rgba(0,100,40,0.55)),
-                url("3.background.jpg") no-repeat center/cover;
+                url("assets/2.background.jpg") no-repeat center/cover;
 }
 .login-box {
     background: rgba(255,255,255,0.12);

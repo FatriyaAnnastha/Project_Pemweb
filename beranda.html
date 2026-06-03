@@ -10,7 +10,7 @@
 <body>
 
 <div id="loading">
-    <img src="7.Logo_CariMakan.png" alt="Logo">
+    <img src="assets/1.Logo_CariMakan.png" alt="Logo">
     <p>Memuat…</p>
 </div>
 
@@ -26,10 +26,10 @@
 <nav class="navbar">
 
     <div class="nav-left">
-        <img src="7.Logo_CariMakan.png" class="logo" alt="CariMakan">
+        <img src="assets/1.Logo_CariMakan.png" class="logo" alt="CariMakan">
 
         <div class="location">
-            <img src="8.Logo lokasi.png" class="simbol" alt="lokasi">
+            <img src="assets/3.Logo lokasi.png" class="simbol" alt="lokasi">
             <span id="lokasi-text">Mendeteksi…</span>
         </div>
     </div>
@@ -47,7 +47,7 @@
         </span>
 
         <a href="#" onclick="handleAuth()">
-            👤 <span id="auth-label">Login</span>
+            <img src="assets/6.login-avatar.png" class="simbol" alt="lokasi"> <span id="auth-label">Login</span>
         </a>
     </div>
 
@@ -64,20 +64,14 @@
 
     <div class="search-box">
 
-        <input
-            type="text"
-            id="q"
-            placeholder="🔍 Cari tempat makan..."
-            onkeyup="renderWarung()"
-        >
-
+        
         <select id="filter-harga" onchange="renderWarung()">
             <option value="">Semua Harga</option>
             <option>Murah</option>
             <option>Sedang</option>
             <option>Mahal</option>
         </select>
-
+        
         <select id="filter-lokasi" onchange="renderWarung()">
             <option value="">Semua Lokasi</option>
             <option>Mataram</option>
@@ -85,7 +79,7 @@
             <option>Ampenan</option>
             <option>Narmada</option>
         </select>
-
+        
         <select id="filter-kategori" onchange="renderWarung()">
             <option value="">Semua Kategori</option>
             <option>Bakso</option>
@@ -94,9 +88,16 @@
             <option>Sate</option>
             <option>Seafood</option>
         </select>
+        
+        <input
+            type="text"
+            id="q"
+            placeholder="Cari langsung..."
+            onkeyup="renderWarung()"
+        >
 
         <button onclick="renderWarung()">
-            Cari 🔍
+           <img src="assets/4.Logo search.png" class="cari" alt="search">
         </button>
 
     </div>
@@ -163,9 +164,14 @@ window.addEventListener('load', () => {
 
         }
 
-        else {
+        else if (s.role === 'user'){
 
-            dashboardLink.href = 'beranda.html';
+           dashboardLink.style.display = 'none';
+
+        } else {
+
+            dashboardLink.style.display = 'inline-block';
+            dashboardLink.href = s.role === 'admin' ? 'dashboard-admin.html' : 'dashboard-pedagang.html';
 
         }
 
@@ -802,6 +808,113 @@ function toggleFavoritDanUpdate(id, nama) {
         '❤️ ' +
         (sudahFavorit ? 'Difavoritkan' : 'Favorit');
 
+}
+
+// Tampilkan bintang rating (HTML)
+function renderStars(rating) {
+    let full = Math.floor(rating);
+    let half = rating % 1 >= 0.5 ? 1 : 0;
+    let starHtml = '';
+    for (let i = 0; i < full; i++) starHtml += '⭐';
+    if (half) starHtml += '½⭐';
+    for (let i = 0; i < 5 - full - half; i++) starHtml += '☆';
+    return starHtml;
+}
+
+// Submit ulasan
+function submitReview(warungId) {
+    const rating = parseInt(document.getElementById('review-rating').value);
+    const komentar = document.getElementById('review-komentar').value;
+    if (!rating || rating < 1 || rating > 5) {
+        showToast('Pilih rating 1–5 bintang!');
+        return;
+    }
+    if (!komentar.trim()) {
+        showToast('Komentar tidak boleh kosong!');
+        return;
+    }
+    if (addReview(warungId, rating, komentar)) {
+        showToast('✅ Ulasan berhasil ditambahkan!');
+        tutupModal();
+        setTimeout(() => bukaDetail(warungId), 500);
+    } else {
+        showToast('❌ Gagal menambahkan ulasan. Pastikan Anda login sebagai pengguna biasa.');
+    }
+}
+
+// bagian ulasan & form
+function bukaDetail(id) {
+    const w = getWarung().find(x => x.id === id);
+    if (!w) return;
+    const statusBuka = cekStatusBuka(w);
+    const statusTeks = statusBuka === true ? '<span class="status-buka">🟢 Sedang Buka</span>' : (statusBuka === false ? '<span class="status-tutup">🔴 Sedang Tutup</span>' : '');
+    const lokasiUrl = (w.lat && w.lng) ? `https://www.google.com/maps?q=${w.lat},${w.lng}` : `https://www.google.com/maps/search/${encodeURIComponent(w.nama + ' ' + w.lokasi)}`;
+
+    const menuHtml = (w.menu && w.menu.length > 0) ? `
+        <table class="modal-menu-table">
+            <thead><tr><th>Menu</th><th>Harga</th></tr></thead>
+            <tbody>${w.menu.map(m => `<tr><td>${m.nama}</td><td>${m.harga ? 'Rp ' + Number(m.harga).toLocaleString('id-ID') : '–'}</td></tr>`).join('')}</tbody>
+        </table>` : '<p style="color:#aaa;font-size:13px;">Belum ada menu tersedia.</p>';
+
+    const hariHtml = (w.hariKerja && w.hariKerja.length > 0) ? w.hariKerja.join(', ') : '–';
+    const waHtml = w.wa ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" style="color:#1565c0;">💬 Chat WhatsApp (${w.wa})</a>` : '–';
+
+    // ambil ulasan
+    const reviews = getReviews(id);
+    const avgRating = w.rating || 0;
+    const reviewListHtml = reviews.length ? reviews.map(rv => `
+        <div style="border-bottom:1px solid #eee; padding:8px 0;">
+            <div style="display:flex; justify-content:space-between;">
+                <strong>${rv.userName}</strong>
+                <span>${renderStars(rv.rating)}</span>
+            </div>
+            <p style="font-size:12px; margin:4px 0;">${rv.komentar}</p>
+            <span style="font-size:10px; color:#aaa;">${new Date(rv.tanggal).toLocaleDateString('id-ID')}</span>
+        </div>
+    `).join('') : '<p style="color:#aaa; font-size:12px;">Belum ada ulasan. Jadilah yang pertama!</p>';
+
+    const session = getSession();
+    const isUser = session && session.role === 'user';
+    const formReview = isUser ? `
+        <hr style="margin:12px 0;">
+        <h4>➕ Tambah Ulasan</h4>
+        <div style="margin-bottom:8px;">
+            <label>Rating: </label>
+            <select id="review-rating" style="padding:6px;border-radius:8px;">
+                <option value="">-- Pilih --</option>
+                <option value="1">⭐ 1</option><option value="2">⭐⭐ 2</option>
+                <option value="3">⭐⭐⭐ 3</option><option value="4">⭐⭐⭐⭐ 4</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5</option>
+            </select>
+        </div>
+        <textarea id="review-komentar" rows="2" placeholder="Tulis komentar Anda..." style="width:100%; border-radius:8px; padding:8px;"></textarea>
+        <button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="submitReview(${id})">Kirim Ulasan</button>
+    ` : (session ? '<p style="font-size:12px; color:#aaa;">⭐ Ulasan hanya untuk pengguna biasa.</p>' : '<p style="font-size:12px; color:#aaa;">🔒 Login sebagai pengguna untuk memberi ulasan.</p>');
+
+    document.getElementById('modal-content').innerHTML = `
+        <img src="${w.img || '4.bakso.jpeg'}" alt="${w.nama}" onerror="this.src='4.bakso.jpeg'" style="width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:14px;">
+        <h2 style="margin:0 0 4px;">${w.nama}</h2>
+        <p style="color:#888;font-size:13px;margin:0 0 10px;">${w.kategori} • ${w.harga} • ${w.lokasi}</p>
+        ${statusTeks ? `<p style="margin:0 0 10px;">${statusTeks}</p>` : ''}
+        <p style="margin:0 0 6px;"><strong>⭐ Rating:</strong> ${avgRating} ${renderStars(avgRating)}</p>
+        ${w.deskripsi ? `<p style="font-size:13px;color:#555;margin:0 0 12px;">${w.deskripsi}</p>` : ''}
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:14px;">
+            <div>🕐 <strong>Jam Buka:</strong> ${w.jamBuka || '–'} – ${w.jamTutup || '–'}</div>
+            <div>📅 <strong>Hari Buka:</strong> ${hariHtml}</div>
+            <div>📞 <strong>Kontak:</strong> ${waHtml}</div>
+        </div>
+        <h4 style="margin:0 0 6px;">🍽️ Menu</h4>
+        ${menuHtml}
+        <hr style="margin:12px 0;">
+        <h4>📝 Ulasan (${reviews.length})</h4>
+        <div style="max-height:200px; overflow-y:auto; margin-bottom:12px;">${reviewListHtml}</div>
+        ${formReview}
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            <a href="${lokasiUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none;flex:1;text-align:center;">📍 Lihat di Maps</a>
+            ${w.wa ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" class="btn btn-outline" style="text-decoration:none;flex:1;text-align:center;">💬 WhatsApp</a>` : ''}
+        </div>
+    `;
+    document.getElementById('modal-detail').classList.add('open');
 }
 
 </script>

@@ -114,3 +114,42 @@ window.addEventListener('load', () => {
     getLocation();
     if (typeof updateFavButtons === 'function') updateFavButtons();
 });
+
+// ── REVIEW SYSTEM (Rating & Ulasan) ──
+function getReviews(warungId) {
+    const all = JSON.parse(localStorage.getItem('cm_reviews') || '[]');
+    return all.filter(r => r.warungId == warungId);
+}
+
+function addReview(warungId, rating, komentar) {
+    const session = getSession();
+    if (!session || session.role !== 'user') return false;
+    const reviews = JSON.parse(localStorage.getItem('cm_reviews') || '[]');
+    const newReview = {
+        id: Date.now(),
+        warungId: warungId,
+        userId: session.email,
+        userName: session.nama,
+        rating: rating,
+        komentar: komentar.trim(),
+        tanggal: new Date().toISOString()
+    };
+    reviews.push(newReview);
+    localStorage.setItem('cm_reviews', JSON.stringify(reviews));
+    recalculateWarungRating(warungId);
+    return true;
+}
+
+function recalculateWarungRating(warungId) {
+    const reviews = getReviews(warungId);
+    if (reviews.length === 0) return;
+    const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    let warungList = getWarung();
+    warungList = warungList.map(w => {
+        if (w.id == warungId) {
+            return { ...w, rating: parseFloat(avg.toFixed(1)) };
+        }
+        return w;
+    });
+    saveWarung(warungList);
+}
