@@ -82,11 +82,9 @@
         
         <select id="filter-kategori" onchange="renderWarung()">
             <option value="">Semua Kategori</option>
-            <option>Bakso</option>
-            <option>Mie Ayam</option>
-            <option>Ayam</option>
-            <option>Sate</option>
-            <option>Seafood</option>
+            <option>Makanan Berat</option>
+            <option>Snack</option>
+            <option>Minuman</option>
         </select>
         
         <input
@@ -134,12 +132,8 @@
 
 <script>
 
-/* =========================
-   INISIALISASI
-========================= */
 
 window.addEventListener('load', () => {
-
     const s = getSession();
 
     if (s) {
@@ -615,14 +609,44 @@ function bukaDetail(id) {
             <tbody>
 
                 ${w.menu.map(m => `
-                    <tr>
-                        <td>${m.nama}</td>
-                        <td>
-                            ${m.harga
-                                ? 'Rp ' + Number(m.harga).toLocaleString('id-ID')
-                                : '–'}
-                        </td>
-                    </tr>
+                <tr>
+
+                    <td>
+
+                     ${
+                        m.gambar
+                        ?
+                        `<img
+                            src="${m.gambar}"
+                            style="
+                                width:70px;
+                                height:70px;
+                                object-fit:cover;
+                                border-radius:8px;
+                                margin-bottom:4px;
+                            ">
+                        <br>`
+                        :
+                        ''
+                    }
+
+                     ${m.nama}
+
+                </td>
+
+                 <td>
+
+                    ${
+                        m.harga
+                        ?
+                        'Rp ' + Number(m.harga).toLocaleString('id-ID')
+                        :
+                        '–'
+                    }
+
+                 </td>
+
+                </tr>
                 `).join('')}
 
             </tbody>

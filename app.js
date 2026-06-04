@@ -104,9 +104,9 @@ function saveWarung(data) {
 
 // Demo users
 const DEMO_USERS = [
-    { email: 'user@mail.com', password: '123', role: 'user', nama: 'Budi Santoso' },
-    { email: 'pedagang@mail.com', password: '123', role: 'pedagang', nama: 'Pak Joel', toko: 'pak_joel' },
-    { email: 'admin@mail.com', password: '123', role: 'admin', nama: 'Admin CariMakan' },
+    { email: 'user@gmail.com', password: '123', role: 'user', nama: 'Budi Santoso' },
+    { email: 'pedagang@gmail.com', password: '123', role: 'pedagang', nama: 'Pak Joel', toko: 'pak_joel' },
+    { email: 'admin@gmail.com', password: '123', role: 'admin', nama: 'Admin CariMakan' },
 ];
 
 window.addEventListener('load', () => {

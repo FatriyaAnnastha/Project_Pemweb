@@ -119,6 +119,18 @@
                             <label>Deskripsi</label>
                             <textarea id="f-deskripsi" placeholder="Ceritakan tentang warung kamu…"></textarea>
                         </div>
+                        <div class="form-group">
+                            <label>Foto Warung</label>
+                            <input type="file" id="f-gambar-warung" accept="image/*">
+
+                            <img id="preview-warung"
+                                style="display:none;
+                                width:100%;
+                                max-height:220px;
+                                object-fit:cover;
+                                border-radius:10px;
+                                margin-top:10px;">
+                        </div>
                     </div>
 
                     <!-- ── KONTAK & JAM OPERASIONAL ── -->
@@ -264,9 +276,40 @@ function setHariDipilih(hariArr) {
 
 // ── MENU ──
 let menuItems = []; // [{nama, harga}]
+let gambarWarung = '';
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const upload = document.getElementById('f-gambar-warung');
+
+    if(upload){
+
+        upload.addEventListener('change', function(){
+            const file = this.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+
+            reader.onload = function(e){
+                gambarWarung = e.target.result;
+                const preview =
+                    document.getElementById('preview-warung');
+                preview.src = gambarWarung;
+                preview.style.display = 'block';
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+});
 
 function tambahMenu() {
-    menuItems.push({ nama: '', harga: '' });
+
+    menuItems.push({
+        nama:'',
+        harga:'',
+        gambar:''
+    });
+
     renderMenuList();
 }
 
@@ -275,28 +318,91 @@ function hapusMenu(idx) {
     renderMenuList();
 }
 
-function renderMenuList() {
-    const wrap = document.getElementById('menu-list');
-    const kosong = document.getElementById('menu-kosong');
-    kosong.style.display = menuItems.length === 0 ? 'block' : 'none';
+function uploadMenuImage(event,index){
 
-    wrap.innerHTML = menuItems.map((m, i) => `
-        <div style="display:flex;gap:8px;align-items:center;">
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+        menuItems[index].gambar =
+            e.target.result;
+        renderMenuList();
+    };
+    reader.readAsDataURL(file);
+}
+
+function renderMenuList() {
+
+    const wrap =
+        document.getElementById('menu-list');
+    const kosong =
+        document.getElementById('menu-kosong');
+
+    kosong.style.display =
+        menuItems.length === 0
+        ? 'block'
+        : 'none';
+
+    wrap.innerHTML = menuItems.map((m,i)=>`
+
+        <div style="
+            border:1px solid #ddd;
+            border-radius:10px;
+            padding:10px;
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        ">
+
             <input type="text"
-                placeholder="Nama menu (contoh: Bakso Urat)"
+                placeholder="Nama Menu"
                 value="${m.nama}"
-                oninput="menuItems[${i}].nama = this.value"
-                style="flex:2;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px;">
-            <input type="text"
-                placeholder="Harga (contoh: 15000)"
+                oninput="menuItems[${i}].nama=this.value">
+
+            <input type="number"
+                placeholder="Harga"
                 value="${m.harga}"
-                oninput="menuItems[${i}].harga = this.value"
-                style="flex:1;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px;">
-            <button onclick="hapusMenu(${i})"
-                style="background:#fdecea;color:#e74c3c;border:none;border-radius:7px;
-                padding:7px 10px;cursor:pointer;font-size:14px;">🗑️</button>
+                oninput="menuItems[${i}].harga=this.value">
+
+            <input type="file"
+                accept="image/*"
+                onchange="uploadMenuImage(event,${i})">
+
+            ${
+                m.gambar
+                ?
+                `
+                <img
+                    src="${m.gambar}"
+                    style="
+                        width:120px;
+                        height:120px;
+                        object-fit:cover;
+                        border-radius:8px;
+                    ">
+                `
+                :
+                ''
+            }
+
+            <button
+                onclick="hapusMenu(${i})"
+                style="
+                    background:#e74c3c;
+                    color:white;
+                    border:none;
+                    padding:8px;
+                    border-radius:8px;
+                    cursor:pointer;
+                ">
+                🗑️ Hapus
+            </button>
+
         </div>
+
     `).join('');
+
 }
 
 // ── TAB NAVIGATION ──
@@ -403,6 +509,18 @@ function editWarung(id) {
     menuItems = (w.menu || []).map(m => ({ ...m }));
     renderMenuList();
 
+    gambarWarung = w.img || '';
+
+    const preview =
+        document.getElementById('preview-warung');
+
+    if(gambarWarung){
+        preview.src = gambarWarung;
+        preview.style.display = 'block';
+    }else{
+        preview.style.display = 'none';
+    }
+
     if (w.lat && w.lng) {
         document.getElementById('latitude').value  = w.lat;
         document.getElementById('longitude').value = w.lng;
@@ -463,7 +581,8 @@ function simpanWarung() {
             hariKerja,
             menu      : menuValid,
             lat       : parseFloat(latitude),
-            lng       : parseFloat(longitude)
+            lng : parseFloat(longitude),
+            img : gambarWarung || w.img
         } : w);
         showToast('✅ Warung berhasil diperbarui!');
     } else {
@@ -485,7 +604,7 @@ function simpanWarung() {
             lng       : parseFloat(longitude),
             rating    : 0,
             status    : 'aktif',
-            img       : '4.bakso.jpeg'
+            img : gambarWarung ||''
         });
         showToast('✅ Warung berhasil ditambahkan!');
     }
@@ -512,6 +631,9 @@ function resetForm() {
     menuItems = [];
     renderMenuList();
     if (leafletMarker) { leafletMarker.remove(); leafletMarker = null; }
+    gambarWarung = '';
+        document.getElementById('f-gambar-warung').value='';
+        document.getElementById('preview-warung').style.display='none';
 }
 
 // ── TOGGLE STATUS & HAPUS ──
