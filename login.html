@@ -21,9 +21,9 @@
         <p>Masuk ke akun CariMakan.ID</p>
 
         <div class="role-tabs">
-            <button class="role-tab active" onclick="setRoleTab('user',this)">👤 Pengguna</button>
-            <button class="role-tab" onclick="setRoleTab('pedagang',this)">🏪 Pedagang</button>
-            <button class="role-tab" onclick="setRoleTab('admin',this)">🛡️ Admin</button>
+            <button class="role-tab active" onclick="setRoleTab('user',this)">Pengguna Biasa</button>
+            <button class="role-tab" onclick="setRoleTab('pedagang',this)">Pedagang</button>
+            <button class="role-tab" onclick="setRoleTab('admin',this)">Admin</button>
         </div>
 
         <input type="email" id="email" placeholder="Email">
@@ -49,40 +49,31 @@
 <script src="app.js"></script>
 <script>
 const hints = {
-    user: 'Demo: user@mail.com / 123',
-    pedagang: 'Demo: pedagang@mail.com / 123',
-    admin: 'Demo: admin@mail.com / 123',
+    user: 'Demo: user@gmail.com / 123 (tapi buat akun dulu)',
+    pedagang: 'Demo: pedagang@gmail.com / 123',
+    admin: 'Demo: admin@gmail.com / 123',
 };
-
 function setRoleTab(role, el) {
     document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('role').value = role;
     document.getElementById('hint').innerHTML = hints[role];
-    // prefill demo
-    document.getElementById('email').value = role + '@mail.com';
+    document.getElementById('email').value = role + '@gmail.com';
     document.getElementById('password').value = '123';
 }
-
-function loginUser() {
+async function loginUser() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const role = document.getElementById('role').value;
-
-    if (!email) { showToast('⚠️ Isi email terlebih dahulu!'); return; }
-    if (!password) { showToast('⚠️ Isi password terlebih dahulu!'); return; }
-
-    const user = DEMO_USERS.find(u => u.email === email && u.password === password && u.role === role);
-    if (!user) {
-        showToast('❌ Email, password, atau role salah!');
-        return;
+    if (!email || !password) { showToast('⚠️ Isi email dan password'); return; }
+    const result = await loginUser(email, password);
+    if (result.success) {
+        showToast('✅ Login berhasil! Mengalihkan...');
+        const redirect = { user: 'beranda.html', pedagang: 'dashboard-pedagang.html', admin: 'dashboard-admin.html' };
+        setTimeout(() => window.location.href = redirect[result.role], 1000);
+    } else {
+        showToast('❌ ' + (result.error || 'Login gagal'));
     }
-
-    setSession(user);
-    showToast('✅ Login berhasil! Mengalihkan…');
-
-    const redirect = { user: 'beranda.html', pedagang: 'dashboard-pedagang.html', admin: 'dashboard-admin.html' };
-    setTimeout(() => window.location.href = redirect[role], 1000);
 }
 </script>
 </body>

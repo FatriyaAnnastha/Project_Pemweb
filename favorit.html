@@ -32,34 +32,36 @@
 
 <script src="app.js"></script>
 <script>
-window.addEventListener('load', () => {
-    const s = getSession();
+window.addEventListener('load', async () => {
+    const s = await checkSession();
     if (s) document.getElementById('auth-label').textContent = 'Logout';
     renderFavorit();
 });
-
-function renderFavorit() {
-    const favIds = getFavorites().map(f => f.id);
-    const list = getWarung().filter(w => favIds.includes(w.id));
+async function renderFavorit() {
+    const favs = await getFavorites();
     const container = document.getElementById('fav-list');
-    if (list.length === 0) {
+    if (favs.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="big-icon">💔</div><p>Belum ada tempat makan di favorit kamu.<br><a href="beranda.html" style="color:var(--primary);font-weight:700;">Cari sekarang →</a></p></div>';
         return;
     }
-    container.innerHTML = list.map(w => `
+    container.innerHTML = favs.map(w => `
         <div class="card">
-            <img src="${w.img}" alt="${w.nama}" onerror="this.src='4.bakso.jpeg'">
+            <img src="${w.img || '4.bakso.jpeg'}" alt="${w.nama}" onerror="this.src='4.bakso.jpeg'">
             <div class="card-body">
                 <h3>${w.nama}</h3>
                 <p>⭐ ${w.rating} | ${w.lokasi}</p>
                 <p style="font-size:11.5px;color:#aaa;margin-bottom:6px">${w.kategori} • ${w.harga}</p>
                 <div class="card-actions">
-                    <button class="btn btn-sm btn-primary" data-fav-id="${w.id}"
-                        onclick="toggleFavorit(${w.id},'${w.nama}');renderFavorit()">❤️ Hapus</button>
+                    <button class="btn btn-sm btn-primary" onclick="hapusFavorit(${w.id}, '${w.nama}')">❤️ Hapus</button>
                 </div>
             </div>
         </div>
     `).join('');
+}
+async function hapusFavorit(id, nama) {
+    await toggleFavorite(id);
+    showToast(`💔 ${nama} dihapus dari favorit`);
+    renderFavorit();
 }
 </script>
 </body>

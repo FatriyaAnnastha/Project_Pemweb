@@ -16,8 +16,8 @@
         <p>Bergabung dengan CariMakan.ID</p>
 
         <div class="role-tabs">
-            <button class="role-tab active" onclick="setRole('user',this)">👤 Pengguna</button>
-            <button class="role-tab" onclick="setRole('pedagang',this)">🏪 Pedagang</button>
+            <button class="role-tab active" onclick="setRole('user',this)">Pengguna Biasa</button>
+            <button class="role-tab" onclick="setRole('pedagang',this)">Pedagang</button>
         </div>
 
         <input type="text" id="r-nama" placeholder="Nama Lengkap">
@@ -45,26 +45,22 @@ function setRole(role, el) {
     el.classList.add('active');
     document.getElementById('r-role').value = role;
 }
-
-function registerUser() {
+async function registerUser() {
     const nama = document.getElementById('r-nama').value.trim();
     const email = document.getElementById('r-email').value.trim();
     const pass = document.getElementById('r-pass').value;
     const pass2 = document.getElementById('r-pass2').value;
     const role = document.getElementById('r-role').value;
-
-    if (!nama || !email || !pass) { showToast('⚠️ Semua field wajib diisi!'); return; }
-    if (pass !== pass2) { showToast('⚠️ Password tidak cocok!'); return; }
-    if (pass.length < 3) { showToast('⚠️ Password minimal 3 karakter!'); return; }
-
-    const extra = JSON.parse(localStorage.getItem('cm_extra_users') || '[]');
-    const allE = [...DEMO_USERS, ...extra];
-    if (allE.find(u => u.email === email)) { showToast('⚠️ Email sudah terdaftar!'); return; }
-
-    extra.push({ nama, email, password: pass, role, toko: nama.toLowerCase().replace(/\s/g,'_') });
-    localStorage.setItem('cm_extra_users', JSON.stringify(extra));
-    showToast('✅ Akun berhasil dibuat! Silakan login.');
-    setTimeout(() => window.location.href = 'login.html', 1500);
+    if (!nama || !email || !pass) { showToast('⚠️ Semua field wajib diisi'); return; }
+    if (pass !== pass2) { showToast('⚠️ Password tidak cocok'); return; }
+    if (pass.length < 3) { showToast('⚠️ Password minimal 3 karakter'); return; }
+    const result = await registerUser(nama, email, pass, role);
+    if (result.success) {
+        showToast('✅ Akun berhasil dibuat! Silakan login.');
+        setTimeout(() => window.location.href = 'login.html', 1500);
+    } else {
+        showToast('❌ ' + (result.error || 'Gagal registrasi'));
+    }
 }
 </script>
 </body>

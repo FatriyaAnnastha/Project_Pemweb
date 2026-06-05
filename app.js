@@ -1,5 +1,4 @@
 // ── SHARED UTILITIES ──
-
 function showToast(msg, duration = 2500) {
     let toast = document.getElementById('toast');
     if (!toast) {
@@ -32,124 +31,171 @@ function getLocation() {
     } else { el.textContent = 'Mataram'; }
 }
 
-// ── FAVORITE SYSTEM ──
-function getFavorites() {
-    return JSON.parse(localStorage.getItem('cm_favorites') || '[]');
-}
-function saveFavorites(favs) {
-    localStorage.setItem('cm_favorites', JSON.stringify(favs));
-}
-function toggleFavorit(id, name) {
-    let favs = getFavorites();
-    const idx = favs.findIndex(f => f.id === id);
-    if (idx === -1) {
-        favs.push({ id, name });
-        showToast('❤️ ' + name + ' ditambahkan ke Favorit!');
-    } else {
-        favs.splice(idx, 1);
-        showToast('💔 ' + name + ' dihapus dari Favorit');
+// ── API BASE URL
+const API_BASE = 'api.php';
+
+// ── SESSION & AUTH (via backend)
+async function checkSession() {
+    const res = await fetch(`${API_BASE}?action=session`);
+    const data = await res.json();
+    if (data.logged_in) {
+        return { id: data.id, nama: data.nama, role: data.role, toko: data.toko };
     }
-    saveFavorites(favs);
-    updateFavButtons();
+    return null;
 }
-function isFavorit(id) {
-    return getFavorites().some(f => f.id === id);
+
+async function loginUser(email, password) {
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
+    const res = await fetch(`${API_BASE}?action=login`, { method: 'POST', body: formData });
+    return res.json();
 }
-function updateFavButtons() {
-    document.querySelectorAll('[data-fav-id]').forEach(btn => {
-        const id = btn.dataset.favId;
-        btn.classList.toggle('btn-primary', isFavorit(id));
-        btn.classList.toggle('btn-outline', !isFavorit(id));
+
+async function registerUser(nama, email, password, role) {
+    const formData = new FormData();
+    formData.append('nama', nama);
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('role', role);
+    if (role === 'pedagang') formData.append('toko', nama.toLowerCase().replace(/\s/g, '_'));
+    const res = await fetch(`${API_BASE}?action=register`, { method: 'POST', body: formData });
+    return res.json();
+}
+
+async function logoutUser() {
+    await fetch(`${API_BASE}?action=logout`);
+    window.location.href = 'login.html';
+}
+
+// ── WARUNG
+async function getWarung(filters = {}) {
+    let url = `${API_BASE}?action=warung`;
+    if (filters.q) url += `&q=${encodeURIComponent(filters.q)}`;
+    if (filters.harga) url += `&harga=${encodeURIComponent(filters.harga)}`;
+    if (filters.lokasi) url += `&lokasi=${encodeURIComponent(filters.lokasi)}`;
+    if (filters.kategori) url += `&kategori=${encodeURIComponent(filters.kategori)}`;
+    const res = await fetch(url);
+    return res.json();
+}
+
+async function getWarungDetail(id) {
+    const res = await fetch(`${API_BASE}?action=warung&id=${id}`);
+    return res.json();
+}
+
+async function saveWarung(data, id = null) {
+    const formData = new FormData();
+    for (let key in data) formData.append(key, data[key]);
+    if (id) formData.append('id', id);
+    const res = await fetch(`${API_BASE}?action=warung`, { method: 'POST', body: formData });
+    return res.json();
+}
+
+async function deleteWarung(id) {
+    const res = await fetch(`${API_BASE}?action=warung&id=${id}`, { method: 'DELETE' });
+    return res.json();
+}
+
+async function toggleWarungStatus(id) {
+    const formData = new FormData();
+    formData.append('id', id);
+    const res = await fetch(`${API_BASE}?action=toggle_status`, { method: 'POST', body: formData });
+    return res.json();
+}
+
+async function getMyWarung() {
+    const res = await fetch(`${API_BASE}?action=my_warung`);
+    return res.json();
+}
+
+// ── MENU
+async function addMenuItem(warungId, nama, harga, gambar) {
+    const res = await fetch(`${API_BASE}?action=add_menu`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ warung_id: warungId, nama, harga, gambar })
     });
+    return res.json();
 }
 
-// ── SESSION / AUTH ──
-function getSession() {
-    return JSON.parse(localStorage.getItem('cm_session') || 'null');
-}
-function setSession(data) {
-    localStorage.setItem('cm_session', JSON.stringify(data));
-}
-function clearSession() {
-    localStorage.removeItem('cm_session');
-}
-function requireAuth(role) {
-    const s = getSession();
-    if (!s || s.role !== role) {
-        window.location.href = 'login.html';
-    }
-}
-function logout() {
-    clearSession();
-    showToast('Berhasil logout 👋');
-    setTimeout(() => window.location.href = 'login.html', 1000);
+async function deleteMenuItem(menuId) {
+    const res = await fetch(`${API_BASE}?action=delete_menu&id=${menuId}`, { method: 'DELETE' });
+    return res.json();
 }
 
-// ── DATA STORE (localStorage mock DB) ──
-const DEMO_WARUNG = [
-    { id: 1, nama: 'Mie Ayam Pak Joel', kategori: 'Mie Ayam', lokasi: 'Mataram', harga: 'Murah', rating: 4.5, img: '5.mie_ayam.jpeg', pedagang: 'pak_joel', status: 'aktif', deskripsi: 'Mie ayam lezat dengan topping ayam dan bakso pilihan.' },
-    { id: 2, nama: 'Bakso Pak Majid', kategori: 'Bakso', lokasi: 'Cakranegara', harga: 'Murah', rating: 4.6, img: '4.bakso.jpeg', pedagang: 'pak_majid', status: 'aktif', deskripsi: 'Bakso sapi dengan kuah kaldu segar dan mie bihun.' },
-    { id: 3, nama: 'Ayam Geprek Gembul', kategori: 'Ayam', lokasi: 'Ampenan', harga: 'Murah', rating: 4.4, img: '1.ayam_geprek.jpeg', pedagang: 'gembul', status: 'aktif', deskripsi: 'Ayam geprek pedas level 1–10 dengan sambal bawang.' },
-    { id: 4, nama: 'Sate Narmada', kategori: 'Sate', lokasi: 'Narmada', harga: 'Sedang', rating: 4.7, img: '6.sate.jpeg', pedagang: 'sate_narmada', status: 'aktif', deskripsi: 'Sate daging pilihan dengan bumbu kacang khas Lombok.' },
-    { id: 5, nama: 'Ayam Taliwang Asli', kategori: 'Ayam', lokasi: 'Ampenan', harga: 'Sedang', rating: 4.5, img: '2.ayam_taliwang.jpeg', pedagang: 'taliwang', status: 'aktif', deskripsi: 'Ayam Taliwang bumbu merah khas Lombok, bakar arang.' },
-];
-
-function getWarung() {
-    const stored = localStorage.getItem('cm_warung');
-    return stored ? JSON.parse(stored) : DEMO_WARUNG;
-}
-function saveWarung(data) {
-    localStorage.setItem('cm_warung', JSON.stringify(data));
+// ── REVIEW
+async function addReview(warungId, rating, komentar) {
+    const res = await fetch(`${API_BASE}?action=add_review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ warung_id: warungId, rating, komentar })
+    });
+    return res.json();
 }
 
-// Demo users
-const DEMO_USERS = [
-    { email: 'user@gmail.com', password: '123', role: 'user', nama: 'Budi Santoso' },
-    { email: 'pedagang@gmail.com', password: '123', role: 'pedagang', nama: 'Pak Joel', toko: 'pak_joel' },
-    { email: 'admin@gmail.com', password: '123', role: 'admin', nama: 'Admin CariMakan' },
-];
+// ── FAVORITE
+async function toggleFavorite(warungId) {
+    const formData = new FormData();
+    formData.append('warung_id', warungId);
+    const res = await fetch(`${API_BASE}?action=favorite`, { method: 'POST', body: formData });
+    return res.json();
+}
 
-window.addEventListener('load', () => {
+async function getFavorites() {
+    const res = await fetch(`${API_BASE}?action=get_favorites`);
+    return res.json();
+}
+
+// ── ADMIN USERS
+async function getAllUsers() {
+    const res = await fetch(`${API_BASE}?action=all_users`);
+    return res.json();
+}
+
+async function addUserByAdmin(nama, email, password, role) {
+    const formData = new FormData();
+    formData.append('nama', nama);
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('role', role);
+    const res = await fetch(`${API_BASE}?action=add_user`, { method: 'POST', body: formData });
+    return res.json();
+}
+
+async function deleteUser(userId) {
+    const res = await fetch(`${API_BASE}?action=delete_user&id=${userId}`, { method: 'DELETE' });
+    return res.json();
+}
+
+// ── UPLOAD GAMBAR
+async function uploadImage(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch('upload.php', { method: 'POST', body: formData });
+    return res.json();
+}
+
+// ── GLOBAL INIT
+window.addEventListener('load', async () => {
     hideLoading();
     getLocation();
-    if (typeof updateFavButtons === 'function') updateFavButtons();
-});
-
-// ── REVIEW SYSTEM (Rating & Ulasan) ──
-function getReviews(warungId) {
-    const all = JSON.parse(localStorage.getItem('cm_reviews') || '[]');
-    return all.filter(r => r.warungId == warungId);
-}
-
-function addReview(warungId, rating, komentar) {
-    const session = getSession();
-    if (!session || session.role !== 'user') return false;
-    const reviews = JSON.parse(localStorage.getItem('cm_reviews') || '[]');
-    const newReview = {
-        id: Date.now(),
-        warungId: warungId,
-        userId: session.email,
-        userName: session.nama,
-        rating: rating,
-        komentar: komentar.trim(),
-        tanggal: new Date().toISOString()
-    };
-    reviews.push(newReview);
-    localStorage.setItem('cm_reviews', JSON.stringify(reviews));
-    recalculateWarungRating(warungId);
-    return true;
-}
-
-function recalculateWarungRating(warungId) {
-    const reviews = getReviews(warungId);
-    if (reviews.length === 0) return;
-    const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-    let warungList = getWarung();
-    warungList = warungList.map(w => {
-        if (w.id == warungId) {
-            return { ...w, rating: parseFloat(avg.toFixed(1)) };
+    const session = await checkSession();
+    if (session) {
+        const userNameSpan = document.getElementById('user-name');
+        if (userNameSpan) userNameSpan.textContent = session.nama;
+        const authLabel = document.getElementById('auth-label');
+        if (authLabel) authLabel.textContent = 'Logout';
+        const dashboardLink = document.getElementById('dashboard-link');
+        if (dashboardLink && session.role !== 'user') {
+            dashboardLink.style.display = 'inline-block';
+            if (session.role === 'admin') dashboardLink.href = 'dashboard-admin.html';
+            else if (session.role === 'pedagang') dashboardLink.href = 'dashboard-pedagang.html';
+        } else if (dashboardLink && session.role === 'user') {
+            dashboardLink.style.display = 'none';
         }
-        return w;
-    });
-    saveWarung(warungList);
-}
+    } else {
+        const authLabel = document.getElementById('auth-label');
+        if (authLabel) authLabel.textContent = 'Login';
+    }
+});

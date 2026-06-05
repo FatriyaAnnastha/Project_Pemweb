@@ -155,151 +155,115 @@
 
 <script src="app.js"></script>
 <script>
-// Simple extra users store
-function getExtraUsers() { return JSON.parse(localStorage.getItem('cm_extra_users') || '[]'); }
-function saveExtraUsers(u) { localStorage.setItem('cm_extra_users', JSON.stringify(u)); }
-function allUsers() { return [...DEMO_USERS, ...getExtraUsers()]; }
-
-window.addEventListener('load', () => {
-    const s = getSession();
+window.addEventListener('load', async () => {
+    const s = await checkSession();
     if (!s || s.role !== 'admin') { window.location.href = 'login.html'; return; }
     document.getElementById('admin-name').textContent = s.nama;
     renderAll();
 });
 
-function renderAll() {
-    renderStats();
-    renderTopWarung();
-    renderAdminWarung();
-    renderUsers();
-    renderLaporan();
+async function renderAll() {
+    await renderStats();
+    await renderTopWarung();
+    await renderAdminWarung();
+    await renderUsers();
+    await renderLaporan();
 }
 
-function showTab(name, el) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    if (el) el.classList.add('active');
-    const titles = { overview:'📊 Dashboard', warung:'🏪 Semua Warung', users:'👥 Manajemen User', laporan:'📋 Laporan' };
-    document.getElementById('page-title').textContent = titles[name] || '';
-}
-
-function renderStats() {
-    const list = getWarung();
+async function renderStats() {
+    const list = await getWarung();
+    const aktif = list.filter(w => w.status === 'aktif');
     document.getElementById('a-warung').textContent = list.length;
-    document.getElementById('a-aktif').textContent = list.filter(w => w.status==='aktif').length;
-    document.getElementById('a-nonaktif').textContent = list.filter(w => w.status!=='aktif').length;
+    document.getElementById('a-aktif').textContent = aktif.length;
+    document.getElementById('a-nonaktif').textContent = list.length - aktif.length;
 }
 
-function renderTopWarung() {
-    const list = [...getWarung()].sort((a,b) => b.rating - a.rating).slice(0,5);
-    document.getElementById('top-warung-body').innerHTML = list.map((w,i) => `
-        <tr>
-            <td>${i+1}</td>
-            <td><strong>${w.nama}</strong></td>
-            <td>${w.kategori}</td>
-            <td>${w.lokasi}</td>
-            <td>⭐ ${w.rating}</td>
-            <td><span class="badge ${w.status==='aktif'?'badge-green':'badge-red'}">${w.status}</span></td>
-        </tr>
+async function renderTopWarung() {
+    const list = await getWarung();
+    const sorted = [...list].sort((a,b) => b.rating - a.rating).slice(0,5);
+    document.getElementById('top-warung-body').innerHTML = sorted.map((w,i) => `
+        <tr><td>${i+1}</td><td><strong>${w.nama}</strong></td><td>${w.kategori}</td><td>${w.lokasi}</td><td>⭐ ${w.rating}</td><td><span class="badge ${w.status==='aktif'?'badge-green':'badge-red'}">${w.status}</span></td></tr>
     `).join('');
 }
 
-function renderAdminWarung() {
-    const q = (document.getElementById('search-warung')?.value || '').toLowerCase();
-    let list = getWarung();
-    if (q) list = list.filter(w => w.nama.toLowerCase().includes(q) || w.kategori.toLowerCase().includes(q) || w.lokasi.toLowerCase().includes(q));
+async function renderAdminWarung() {
+    const q = document.getElementById('search-warung')?.value.toLowerCase() || '';
+    let list = await getWarung();
+    if (q) list = list.filter(w => w.nama.toLowerCase().includes(q) || w.kategori.toLowerCase().includes(q));
     document.getElementById('admin-warung-body').innerHTML = list.map(w => `
         <tr>
-            <td><strong>${w.nama}</strong><br><small style="color:var(--text-muted)">${w.deskripsi||''}</small></td>
-            <td>${w.kategori}</td>
-            <td>${w.lokasi}</td>
-            <td>${w.pedagang}</td>
-            <td>⭐ ${w.rating}</td>
-            <td><span class="badge ${w.status==='aktif'?'badge-green':'badge-red'}">${w.status}</span></td>
-            <td style="display:flex;gap:6px;">
-                <button class="btn btn-sm btn-warning" onclick="adminToggle(${w.id})">${w.status==='aktif'?'⛔':'✅'}</button>
-                <button class="btn btn-sm" style="background:#fdecea;color:#e74c3c;" onclick="adminHapus(${w.id})">🗑️</button>
-            </td>
+            <td><strong>${w.nama}</strong><br><small>${w.deskripsi||''}</small></td>
+            <td>${w.kategori}</td><td>${w.lokasi}</td><td>${w.pedagang_nama || w.pedagang_id}</td>
+            <td>⭐ ${w.rating}</td><td><span class="badge ${w.status==='aktif'?'badge-green':'badge-red'}">${w.status}</span></td>
+            <td><button class="btn btn-sm btn-warning" onclick="adminToggle(${w.id})">${w.status==='aktif'?'⛔':'✅'}</button>
+            <button class="btn btn-sm" style="background:#fdecea;color:#e74c3c;" onclick="adminHapus(${w.id})">🗑️</button></td>
         </tr>
-    `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">Tidak ada data</td></tr>';
+    `).join('') || '<tr><td colspan="7">Tidak ada data</td></tr>';
 }
 
-function adminToggle(id) {
-    let list = getWarung().map(w => w.id===id ? {...w, status: w.status==='aktif'?'nonaktif':'aktif'} : w);
-    saveWarung(list);
+async function adminToggle(id) {
+    await toggleWarungStatus(id);
     renderAll();
-    showToast('Status warung diperbarui!');
+    showToast('Status warung diperbarui');
 }
-
-function adminHapus(id) {
-    if (!confirm('Hapus warung ini secara permanen?')) return;
-    saveWarung(getWarung().filter(w => w.id !== id));
+async function adminHapus(id) {
+    if (!confirm('Hapus warung ini?')) return;
+    await deleteWarung(id);
     renderAll();
-    showToast('🗑️ Warung dihapus!');
+    showToast('Warung dihapus');
 }
 
-function renderUsers() {
-    const users = allUsers();
+async function renderUsers() {
+    const users = await getAllUsers();
     const roleColor = { user:'badge-green', pedagang:'badge-blue', admin:'badge-purple' };
     document.getElementById('users-body').innerHTML = users.map((u,i) => `
-        <tr>
-            <td>${i+1}</td>
-            <td><strong>${u.nama}</strong></td>
-            <td>${u.email}</td>
-            <td><span class="badge ${roleColor[u.role]||'badge-green'}">${u.role}</span></td>
-            <td>${u.role==='admin' ? '<span style="color:var(--text-muted);font-size:12px;">–</span>' :
-                `<button class="btn btn-sm" style="background:#fdecea;color:#e74c3c;" onclick="hapusUser('${u.email}')">🗑️</button>`}
-            </td>
-        </tr>
+        <tr><td>${i+1}</td><td><strong>${u.nama}</strong></td><td>${u.email}</td>
+        <td><span class="badge ${roleColor[u.role]}">${u.role}</span></td>
+        <td>${u.role==='admin' ? '–' : `<button class="btn btn-sm" style="background:#fdecea;color:#e74c3c;" onclick="hapusUser(${u.id})">🗑️</button>`}</td></tr>
     `).join('');
 }
 
-function tambahUser() {
+async function tambahUser() {
     const nama = document.getElementById('u-nama').value.trim();
     const email = document.getElementById('u-email').value.trim();
     const pass = document.getElementById('u-pass').value;
     const role = document.getElementById('u-role').value;
-    if (!nama || !email || !pass) { showToast('⚠️ Semua field wajib diisi!'); return; }
-    const extra = getExtraUsers();
-    if ([...DEMO_USERS, ...extra].find(u => u.email === email)) { showToast('⚠️ Email sudah terdaftar!'); return; }
-    extra.push({ nama, email, password: pass, role, toko: nama.toLowerCase().replace(/\s/g,'_') });
-    saveExtraUsers(extra);
-    renderUsers();
-    showToast('✅ User berhasil ditambahkan!');
-    document.getElementById('u-nama').value = '';
-    document.getElementById('u-email').value = '';
-    document.getElementById('u-pass').value = '';
+    if (!nama || !email || !pass) { showToast('Semua field wajib diisi'); return; }
+    const result = await addUserByAdmin(nama, email, pass, role);
+    if (result.success) {
+        showToast('User berhasil ditambahkan');
+        renderUsers();
+        document.getElementById('u-nama').value = '';
+        document.getElementById('u-email').value = '';
+        document.getElementById('u-pass').value = '';
+    } else {
+        showToast(result.error || 'Gagal');
+    }
 }
 
-function hapusUser(email) {
+async function hapusUser(id) {
     if (!confirm('Hapus user ini?')) return;
-    saveExtraUsers(getExtraUsers().filter(u => u.email !== email));
+    await deleteUser(id);
     renderUsers();
-    showToast('🗑️ User dihapus!');
+    showToast('User dihapus');
 }
 
-function renderLaporan() {
-    const list = getWarung();
-    // Most popular city
+async function renderLaporan() {
+    const list = await getWarung();
     const kotaCount = {};
     list.forEach(w => kotaCount[w.lokasi] = (kotaCount[w.lokasi]||0)+1);
     const topKota = Object.entries(kotaCount).sort((a,b)=>b[1]-a[1])[0];
     document.getElementById('l-kota').textContent = topKota ? topKota[0] : '–';
-    // Most popular category
     const katCount = {};
     list.forEach(w => katCount[w.kategori] = (katCount[w.kategori]||0)+1);
     const topKat = Object.entries(katCount).sort((a,b)=>b[1]-a[1])[0];
     document.getElementById('l-kat').textContent = topKat ? topKat[0] : '–';
-    // Highest rating
     const topRating = Math.max(...list.map(w=>w.rating));
     document.getElementById('l-rating').textContent = topRating || '–';
-
-    // Simple bar chart
     const maxCount = Math.max(...Object.values(katCount));
     document.getElementById('chart-container').innerHTML = Object.entries(katCount).map(([k,v]) => `
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-            <div style="width:100px;font-size:12.5px;font-weight:600;color:var(--text-muted);">${k}</div>
+            <div style="width:100px;font-size:12.5px;font-weight:600;">${k}</div>
             <div style="flex:1;background:#f0ece8;border-radius:8px;height:26px;overflow:hidden;">
                 <div style="width:${(v/maxCount)*100}%;background:var(--admin-color);height:100%;border-radius:8px;display:flex;align-items:center;padding-left:10px;">
                     <span style="color:white;font-size:11px;font-weight:700;">${v} warung</span>
@@ -307,14 +271,17 @@ function renderLaporan() {
             </div>
         </div>
     `).join('');
-
-    // Log
     const now = new Date();
-    document.getElementById('log-body').innerHTML = [
-        `🟢 ${now.toLocaleString('id')} — Admin login`,
-        `📋 ${new Date(now-60000).toLocaleString('id')} — Data warung dimuat (${list.length} entri)`,
-        `👥 ${new Date(now-120000).toLocaleString('id')} — Data user dimuat (${allUsers().length} user)`,
-    ].join('<br>');
+    document.getElementById('log-body').innerHTML = `🟢 ${now.toLocaleString('id')} — Admin login<br>📋 Data warung dimuat (${list.length} entri)<br>👥 Data user dimuat`;
+}
+
+function showTab(name, el) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    if (el) el.classList.add('active');
+    const titles = { overview:'📊 Dashboard', warung:'🏪 Semua Warung', users:'👥 Manajemen User', laporan:'📋 Laporan' };
+    document.getElementById('page-title').textContent = titles[name] || '';
 }
 </script>
 </body>

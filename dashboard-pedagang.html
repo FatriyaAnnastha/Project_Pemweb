@@ -34,7 +34,7 @@
     <!-- MAIN -->
     <main class="main-content">
         <header class="main-header">
-            <h1 id="page-title"><img src="assets/11-dashboard.png" class="simbol" alt="lokasi"> Dashboard</h1>
+            <h1 id="page-title">Dashboard</h1>
             <div style="display:flex;align-items:center;gap:12px;">
                 <span class="role-badge pedagang"><img src="assets/6.login-avatar.png" class="logout" alt="lokasi"> Pedagang</span>
                 <span id="pedagang-name" style="font-weight:700;font-size:13px;">–</span>
@@ -204,14 +204,12 @@
 
 <script src="app.js"></script>
 <script>
-
-// ── KONSTANTA HARI ──
+// ── KONSTANTA HARI
 const HARI_LIST = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-
-// ── LEAFLET MAP ──
-let leafletMap     = null;
-let leafletMarker  = null;
-let mapInitialized = false;
+let leafletMap = null, leafletMarker = null, mapInitialized = false;
+let currentSession = null;
+let menuItems = []; // [{nama, harga, gambar}]
+let gambarWarung = '';
 
 function initLeafletMap() {
     if (mapInitialized) { leafletMap.invalidateSize(); return; }
@@ -222,221 +220,128 @@ function initLeafletMap() {
     leafletMap.on('click', function(e) {
         const lat = e.latlng.lat.toFixed(6);
         const lng = e.latlng.lng.toFixed(6);
-        document.getElementById('latitude').value  = lat;
+        document.getElementById('latitude').value = lat;
         document.getElementById('longitude').value = lng;
         document.getElementById('koordinat-info').style.display = 'block';
         document.getElementById('koordinat-text').textContent = lat + ', ' + lng;
-        if (leafletMarker) { leafletMarker.setLatLng([lat, lng]); }
-        else { leafletMarker = L.marker([lat, lng]).addTo(leafletMap); }
+        if (leafletMarker) leafletMarker.setLatLng([lat, lng]);
+        else leafletMarker = L.marker([lat, lng]).addTo(leafletMap);
         leafletMarker.bindPopup('📍 Lokasi warung').openPopup();
     });
     mapInitialized = true;
 }
 
-// ── SESSION ──
-let currentSession = null;
-
-window.addEventListener('load', () => {
-    currentSession = getSession();
+window.addEventListener('load', async () => {
+    currentSession = await checkSession();
     if (!currentSession || currentSession.role !== 'pedagang') {
         window.location.href = 'login.html'; return;
     }
     document.getElementById('pedagang-name').textContent = currentSession.nama;
-    document.getElementById('p-nama').value  = currentSession.nama;
+    document.getElementById('p-nama').value = currentSession.nama;
     document.getElementById('p-email').value = currentSession.email;
     buatHariCheckbox();
-    renderOverview();
-    renderWarungTable();
+    await renderOverview();
+    await renderWarungTable();
+
+    const upload = document.getElementById('f-gambar-warung');
+    if (upload) {
+        upload.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                // Upload gambar ke server
+                const result = await uploadImage(file);
+                if (result.success) {
+                    gambarWarung = result.path;
+                    const preview = document.getElementById('preview-warung');
+                    preview.src = gambarWarung;
+                    preview.style.display = 'block';
+                } else {
+                    showToast('Gagal upload gambar warung');
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 });
 
-// ── BUAT CHECKBOX HARI ──
 function buatHariCheckbox() {
     const wrap = document.getElementById('hari-checkboxes');
     wrap.innerHTML = HARI_LIST.map(h => `
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;
-            background:#fff;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:13px;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;background:#fff;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:13px;">
             <input type="checkbox" class="hari-cb" value="${h}" style="cursor:pointer;"> ${h}
         </label>
     `).join('');
 }
-
 function getHariDipilih() {
     return [...document.querySelectorAll('.hari-cb:checked')].map(cb => cb.value);
 }
-
 function setHariDipilih(hariArr) {
     document.querySelectorAll('.hari-cb').forEach(cb => {
         cb.checked = hariArr && hariArr.includes(cb.value);
     });
 }
 
-// ── MENU ──
-let menuItems = []; // [{nama, harga}]
-let gambarWarung = '';
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    const upload = document.getElementById('f-gambar-warung');
-
-    if(upload){
-
-        upload.addEventListener('change', function(){
-            const file = this.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-
-            reader.onload = function(e){
-                gambarWarung = e.target.result;
-                const preview =
-                    document.getElementById('preview-warung');
-                preview.src = gambarWarung;
-                preview.style.display = 'block';
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-});
-
 function tambahMenu() {
-
-    menuItems.push({
-        nama:'',
-        harga:'',
-        gambar:''
-    });
-
+    menuItems.push({ nama: '', harga: '', gambar: '' });
     renderMenuList();
 }
-
 function hapusMenu(idx) {
     menuItems.splice(idx, 1);
     renderMenuList();
 }
-
-function uploadMenuImage(event,index){
-
+async function uploadMenuImage(event, index) {
     const file = event.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-
-    reader.onload = function(e){
-        menuItems[index].gambar =
-            e.target.result;
+    if (!file) return;
+    const result = await uploadImage(file);
+    if (result.success) {
+        menuItems[index].gambar = result.path;
         renderMenuList();
-    };
-    reader.readAsDataURL(file);
+    } else {
+        showToast('Gagal upload gambar menu');
+    }
 }
-
 function renderMenuList() {
-
-    const wrap =
-        document.getElementById('menu-list');
-    const kosong =
-        document.getElementById('menu-kosong');
-
-    kosong.style.display =
-        menuItems.length === 0
-        ? 'block'
-        : 'none';
-
-    wrap.innerHTML = menuItems.map((m,i)=>`
-
-        <div style="
-            border:1px solid #ddd;
-            border-radius:10px;
-            padding:10px;
-            display:flex;
-            flex-direction:column;
-            gap:8px;
-        ">
-
-            <input type="text"
-                placeholder="Nama Menu"
-                value="${m.nama}"
-                oninput="menuItems[${i}].nama=this.value">
-
-            <input type="number"
-                placeholder="Harga"
-                value="${m.harga}"
-                oninput="menuItems[${i}].harga=this.value">
-
-            <input type="file"
-                accept="image/*"
-                onchange="uploadMenuImage(event,${i})">
-
-            ${
-                m.gambar
-                ?
-                `
-                <img
-                    src="${m.gambar}"
-                    style="
-                        width:120px;
-                        height:120px;
-                        object-fit:cover;
-                        border-radius:8px;
-                    ">
-                `
-                :
-                ''
-            }
-
-            <button
-                onclick="hapusMenu(${i})"
-                style="
-                    background:#e74c3c;
-                    color:white;
-                    border:none;
-                    padding:8px;
-                    border-radius:8px;
-                    cursor:pointer;
-                ">
-                🗑️ Hapus
-            </button>
-
+    const wrap = document.getElementById('menu-list');
+    const kosong = document.getElementById('menu-kosong');
+    kosong.style.display = menuItems.length === 0 ? 'block' : 'none';
+    wrap.innerHTML = menuItems.map((m, i) => `
+        <div style="border:1px solid #ddd;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;">
+            <input type="text" placeholder="Nama Menu" value="${m.nama}" oninput="menuItems[${i}].nama=this.value">
+            <input type="number" placeholder="Harga" value="${m.harga}" oninput="menuItems[${i}].harga=this.value">
+            <input type="file" accept="image/*" onchange="uploadMenuImage(event,${i})">
+            ${m.gambar ? `<img src="${m.gambar}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;">` : ''}
+            <button onclick="hapusMenu(${i})" style="background:#e74c3c;color:white;border:none;padding:8px;border-radius:8px;cursor:pointer;">🗑️ Hapus</button>
         </div>
-
     `).join('');
-
 }
 
-// ── TAB NAVIGATION ──
 function showTab(name, event) {
     if (event) event.preventDefault();
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
-    const titles = {
-        overview:'📊 Ringkasan', warung:'🏪 Kelola Warung',
-        tambah:'➕ Tambah/Edit Warung', profil:'👤 Profil Saya'
-    };
-    document.getElementById('page-title').textContent = titles[name] || '';
+    const titles = { overview:'📊 Ringkasan', warung:'🏪 Kelola Warung', tambah:'➕ Tambah/Edit Warung', profil:'👤 Profil Saya' };
+    document.getElementById('page-title').innerHTML = `<img src="assets/11-dashboard.png" class="simbol" alt="lokasi"> ${titles[name] || ''}`;
     if (event && event.currentTarget) event.currentTarget.classList.add('active');
     if (name === 'tambah') setTimeout(() => initLeafletMap(), 150);
 }
 
-// ── FILTER WARUNG MILIK PEDAGANG ──
-function myWarung() {
-    return getWarung().filter(w => w.pedagang === currentSession.toko);
-}
-
-// ── RENDER OVERVIEW ──
-function renderOverview() {
-    const list = myWarung();
+async function renderOverview() {
+    const list = await getMyWarung();
     document.getElementById('s-total').textContent = list.length;
     document.getElementById('s-aktif').textContent = list.filter(w => w.status === 'aktif').length;
-    const avg = list.length
-        ? (list.reduce((s, w) => s + (w.rating || 0), 0) / list.length).toFixed(1) : '–';
+    const avg = list.length ? (list.reduce((s, w) => s + (w.rating || 0), 0) / list.length).toFixed(1) : '–';
     document.getElementById('s-rating').textContent = avg;
-    const favIds = getFavorites().map(f => f.id);
+    const favorites = await getFavorites();
+    const favIds = favorites.map(f => f.id);
     document.getElementById('s-fav').textContent = list.filter(w => favIds.includes(w.id)).length;
 
     const container = document.getElementById('my-warung-cards');
     if (list.length === 0) {
         container.innerHTML = `<div class="empty-state"><div class="big-icon">🏪</div>
-            <p>Belum ada warung. <a href="#" onclick="showTab('tambah',event)"
-            style="color:var(--pedagang-color);font-weight:700;">Tambah sekarang →</a></p></div>`;
+            <p>Belum ada warung. <a href="#" onclick="showTab('tambah',event)" style="color:var(--pedagang-color);font-weight:700;">Tambah sekarang →</a></p></div>`;
         return;
     }
     container.innerHTML = list.map(w => `
@@ -445,182 +350,119 @@ function renderOverview() {
             <div class="card-body">
                 <h3>${w.nama}</h3>
                 <p>⭐ ${w.rating || 0} | ${w.lokasi}</p>
-                ${w.jamBuka ? `<p style="font-size:11.5px;color:#aaa;">🕐 ${w.jamBuka} – ${w.jamTutup}</p>` : ''}
+                ${w.jam_buka ? `<p style="font-size:11.5px;color:#aaa;">🕐 ${w.jam_buka} – ${w.jam_tutup}</p>` : ''}
                 ${w.wa ? `<p style="font-size:11.5px;color:#aaa;">📞 ${w.wa}</p>` : ''}
-                <p style="font-size:11.5px;color:#aaa;margin-bottom:8px">
-                    ${w.status === 'aktif' ? '✅ Aktif' : '⛔ Nonaktif'}
-                </p>
+                <p style="font-size:11.5px;color:#aaa;margin-bottom:8px">${w.status === 'aktif' ? '✅ Aktif' : '⛔ Nonaktif'}</p>
                 <div class="card-actions">
                     <button class="btn btn-sm btn-primary" onclick="editWarung(${w.id})">✏️ Edit</button>
-                    <button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">
-                        ${w.status === 'aktif' ? '⛔ Nonaktifkan' : '✅ Aktifkan'}
-                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">${w.status === 'aktif' ? '⛔ Nonaktifkan' : '✅ Aktifkan'}</button>
                 </div>
             </div>
         </div>`).join('');
 }
 
-// ── RENDER TABEL ──
-function renderWarungTable() {
-    const list = myWarung();
+async function renderWarungTable() {
+    const list = await getMyWarung();
     const body = document.getElementById('warung-table-body');
     body.innerHTML = list.map(w => `
         <tr>
             <td><strong>${w.nama}</strong></td>
-            <td>${w.kategori}</td>
-            <td>${w.lokasi}</td>
-            <td>${w.harga}</td>
+            <td>${w.kategori}</td><td>${w.lokasi}</td><td>${w.harga}</td>
             <td>⭐ ${w.rating || 0}</td>
             <td><span class="badge ${w.status==='aktif'?'badge-green':'badge-red'}">${w.status}</span></td>
             <td style="display:flex;gap:6px;">
                 <button class="btn btn-sm btn-warning" onclick="editWarung(${w.id})">✏️</button>
-                <button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">
-                    ${w.status==='aktif'?'⛔':'✅'}
-                </button>
-                <button class="btn btn-sm" style="background:#fdecea;color:#e74c3c;"
-                    onclick="hapusWarung(${w.id})">🗑️</button>
+                <button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">${w.status==='aktif'?'⛔':'✅'}</button>
+                <button class="btn btn-sm" style="background:#fdecea;color:#e74c3c;" onclick="hapusWarung(${w.id})">🗑️</button>
             </td>
-        </tr>`).join('')
-        || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">Belum ada warung terdaftar</td></tr>';
+        </tr>
+    `).join('') || '<tr><td colspan="7">Belum ada warung terdaftar</td></tr>';
 }
 
-// ── EDIT WARUNG ──
-function editWarung(id) {
-    const w = getWarung().find(x => x.id === id);
-    if (!w) return;
-
-    document.getElementById('edit-id').value     = id;
-    document.getElementById('f-nama').value      = w.nama;
-    document.getElementById('f-kategori').value  = w.kategori;
-    document.getElementById('f-lokasi').value    = w.lokasi;
-    document.getElementById('f-harga').value     = w.harga;
+async function editWarung(id) {
+    const w = await getWarungDetail(id);
+    if (!w || w.error) { showToast('Gagal memuat data warung'); return; }
+    document.getElementById('edit-id').value = id;
+    document.getElementById('f-nama').value = w.nama;
+    document.getElementById('f-kategori').value = w.kategori;
+    document.getElementById('f-lokasi').value = w.lokasi;
+    document.getElementById('f-harga').value = w.harga;
     document.getElementById('f-deskripsi').value = w.deskripsi || '';
-    document.getElementById('f-wa').value        = w.wa || '';
-    document.getElementById('f-jam-buka').value  = w.jamBuka || '08:00';
-    document.getElementById('f-jam-tutup').value = w.jamTutup || '21:00';
-
-    setHariDipilih(w.hariKerja || []);
-
-    // Load menu
+    document.getElementById('f-wa').value = w.wa || '';
+    document.getElementById('f-jam-buka').value = w.jam_buka || '08:00';
+    document.getElementById('f-jam-tutup').value = w.jam_tutup || '21:00';
+    setHariDipilih(w.hari_kerja ? w.hari_kerja.split(',') : []);
     menuItems = (w.menu || []).map(m => ({ ...m }));
     renderMenuList();
-
     gambarWarung = w.img || '';
-
-    const preview =
-        document.getElementById('preview-warung');
-
-    if(gambarWarung){
+    const preview = document.getElementById('preview-warung');
+    if (gambarWarung) {
         preview.src = gambarWarung;
         preview.style.display = 'block';
-    }else{
+    } else {
         preview.style.display = 'none';
     }
-
     if (w.lat && w.lng) {
-        document.getElementById('latitude').value  = w.lat;
+        document.getElementById('latitude').value = w.lat;
         document.getElementById('longitude').value = w.lng;
         document.getElementById('koordinat-info').style.display = 'block';
-        document.getElementById('koordinat-text').textContent   = w.lat + ', ' + w.lng;
+        document.getElementById('koordinat-text').textContent = w.lat + ', ' + w.lng;
     }
-
     document.getElementById('form-title').textContent = '✏️ Edit Warung';
     showTab('tambah', null);
-
     setTimeout(() => {
         if (w.lat && w.lng) {
-            if (leafletMarker) { leafletMarker.setLatLng([w.lat, w.lng]); }
-            else { leafletMarker = L.marker([w.lat, w.lng]).addTo(leafletMap); }
+            if (leafletMarker) leafletMarker.setLatLng([w.lat, w.lng]);
+            else leafletMarker = L.marker([w.lat, w.lng]).addTo(leafletMap);
             leafletMap.setView([w.lat, w.lng], 15);
             leafletMarker.bindPopup('📍 Lokasi warung').openPopup();
         }
     }, 300);
 }
 
-// ── SIMPAN WARUNG ──
-function simpanWarung() {
+async function simpanWarung() {
     const namaWarung = document.getElementById('f-nama').value.trim();
-    const kategori   = document.getElementById('f-kategori').value;
-    const lokasi     = document.getElementById('f-lokasi').value;
-    const harga      = document.getElementById('f-harga').value;
-    const deskripsi  = document.getElementById('f-deskripsi').value.trim();
-    const wa         = document.getElementById('f-wa').value.trim();
-    const jamBuka    = document.getElementById('f-jam-buka').value;
-    const jamTutup   = document.getElementById('f-jam-tutup').value;
-    const hariKerja  = getHariDipilih();
-    const latitude   = document.getElementById('latitude').value;
-    const longitude  = document.getElementById('longitude').value;
-    const editId     = document.getElementById('edit-id').value;
-
-    // Validasi
+    const kategori = document.getElementById('f-kategori').value;
+    const lokasi = document.getElementById('f-lokasi').value;
+    const harga = document.getElementById('f-harga').value;
+    const deskripsi = document.getElementById('f-deskripsi').value.trim();
+    const wa = document.getElementById('f-wa').value.trim();
+    const jamBuka = document.getElementById('f-jam-buka').value;
+    const jamTutup = document.getElementById('f-jam-tutup').value;
+    const hariKerja = getHariDipilih();
+    const latitude = document.getElementById('latitude').value;
+    const longitude = document.getElementById('longitude').value;
+    const editId = document.getElementById('edit-id').value;
     if (!namaWarung) { alert('Nama warung wajib diisi!'); return; }
     if (hariKerja.length === 0) { alert('Pilih minimal satu hari buka!'); return; }
     if (!jamBuka || !jamTutup) { alert('Jam buka dan tutup wajib diisi!'); return; }
     if (!latitude || !longitude) { alert('Pilih lokasi warung di peta terlebih dahulu!'); return; }
-
-    // Filter menu yang terisi
     const menuValid = menuItems.filter(m => m.nama.trim() !== '');
-
-    let warungList = getWarung();
-
-    if (editId) {
-        warungList = warungList.map(w => Number(w.id) === Number(editId) ? {
-            ...w,
-            nama      : namaWarung,
-            kategori,
-            lokasi,
-            harga,
-            deskripsi,
-            wa,
-            jamBuka,
-            jamTutup,
-            hariKerja,
-            menu      : menuValid,
-            lat       : parseFloat(latitude),
-            lng : parseFloat(longitude),
-            img : gambarWarung || w.img
-        } : w);
-        showToast('✅ Warung berhasil diperbarui!');
+    const dataWarung = {
+        nama: namaWarung, kategori, lokasi, harga, deskripsi, wa,
+        jam_buka: jamBuka, jam_tutup: jamTutup, hari_kerja: hariKerja.join(','),
+        lat: parseFloat(latitude), lng: parseFloat(longitude), img: gambarWarung
+    };
+    const result = await saveWarung(dataWarung, editId || null);
+    if (result.success) {
+        showToast(editId ? '✅ Warung berhasil diperbarui!' : '✅ Warung berhasil ditambahkan!');
+        resetForm();
+        await renderOverview();
+        await renderWarungTable();
     } else {
-        warungList.push({
-            id        : Date.now(),
-            nama      : namaWarung,
-            kategori,
-            lokasi,
-            harga,
-            deskripsi,
-            wa,
-            jamBuka,
-            jamTutup,
-            hariKerja,
-            menu      : menuValid,
-            pedagang  : currentSession.toko,
-            owner     : currentSession.nama,
-            lat       : parseFloat(latitude),
-            lng       : parseFloat(longitude),
-            rating    : 0,
-            status    : 'aktif',
-            img : gambarWarung ||''
-        });
-        showToast('✅ Warung berhasil ditambahkan!');
+        showToast('❌ Gagal menyimpan warung');
     }
-
-    saveWarung(warungList);
-    resetForm();
-    renderOverview();
-    renderWarungTable();
 }
 
-// ── RESET FORM ──
 function resetForm() {
-    document.getElementById('edit-id').value     = '';
-    document.getElementById('f-nama').value      = '';
+    document.getElementById('edit-id').value = '';
+    document.getElementById('f-nama').value = '';
     document.getElementById('f-deskripsi').value = '';
-    document.getElementById('f-wa').value        = '';
-    document.getElementById('f-jam-buka').value  = '08:00';
+    document.getElementById('f-wa').value = '';
+    document.getElementById('f-jam-buka').value = '08:00';
     document.getElementById('f-jam-tutup').value = '21:00';
-    document.getElementById('latitude').value    = '';
-    document.getElementById('longitude').value   = '';
+    document.getElementById('latitude').value = '';
+    document.getElementById('longitude').value = '';
     document.getElementById('koordinat-info').style.display = 'none';
     document.getElementById('form-title').textContent = '➕ Tambah Warung';
     setHariDipilih([]);
@@ -628,29 +470,25 @@ function resetForm() {
     renderMenuList();
     if (leafletMarker) { leafletMarker.remove(); leafletMarker = null; }
     gambarWarung = '';
-        document.getElementById('f-gambar-warung').value='';
-        document.getElementById('preview-warung').style.display='none';
+    document.getElementById('f-gambar-warung').value = '';
+    document.getElementById('preview-warung').style.display = 'none';
 }
 
-// ── TOGGLE STATUS & HAPUS ──
-function toggleStatus(id) {
-    let list = getWarung().map(w =>
-        w.id === id ? { ...w, status: w.status === 'aktif' ? 'nonaktif' : 'aktif' } : w
-    );
-    saveWarung(list);
-    renderOverview();
-    renderWarungTable();
-    showToast('Status warung diperbarui!');
+async function toggleStatus(id) {
+    const result = await toggleWarungStatus(id);
+    if (result.success) {
+        await renderOverview();
+        await renderWarungTable();
+        showToast('Status warung diperbarui!');
+    }
 }
-
-function hapusWarung(id) {
+async function hapusWarung(id) {
     if (!confirm('Hapus warung ini?')) return;
-    saveWarung(getWarung().filter(w => w.id !== id));
-    renderOverview();
-    renderWarungTable();
+    await deleteWarung(id);
+    await renderOverview();
+    await renderWarungTable();
     showToast('🗑️ Warung dihapus!');
 }
-
 </script>
 </body>
 </html>
