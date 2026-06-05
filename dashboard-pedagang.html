@@ -20,23 +20,23 @@
             <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;">PANEL PEDAGANG</div>
         </div>
         <nav class="sidebar-menu">
-            <a href="#" class="active" onclick="showTab('overview', event)"><span class="icon">📊</span> Ringkasan</a>
-            <a href="#" onclick="showTab('warung', event)"><span class="icon">🏪</span> Kelola Warung</a>
-            <a href="#" onclick="showTab('tambah', event)"><span class="icon">➕</span> Tambah/Edit Warung</a>
-            <a href="#" onclick="showTab('profil', event)"><span class="icon">👤</span> Profil Saya</a>
-            <a href="beranda.html"><span class="icon">🏠</span> Lihat Beranda</a>
+            <a href="#" class="active" onclick="showTab('overview', event)"> Dashboard</a>
+            <a href="#" onclick="showTab('warung', event)"> Kelola Warung</a>
+            <a href="#" onclick="showTab('tambah', event)"> Tambah/Edit Warung</a>
+            <a href="#" onclick="showTab('profil', event)"> Profil Saya</a>
+            <a href="beranda.html"> Lihat Beranda</a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" onclick="logout()" style="color:rgba(255,255,255,0.4);text-decoration:none;font-size:12px;">🚪 Keluar</a>
+            <a href="#" onclick="logout()" style="color:rgba(255,255,255,0.4);text-decoration:none;font-size:12px;"><img src="assets/7.Logout.png" class="logout" alt="lokasi"> Logout</a>
         </div>
     </aside>
 
     <!-- MAIN -->
     <main class="main-content">
         <header class="main-header">
-            <h1 id="page-title">📊 Ringkasan</h1>
+            <h1 id="page-title"><img src="assets/11-dashboard.png" class="simbol" alt="lokasi"> Dashboard</h1>
             <div style="display:flex;align-items:center;gap:12px;">
-                <span class="role-badge pedagang">🏪 Pedagang</span>
+                <span class="role-badge pedagang"><img src="assets/6.login-avatar.png" class="logout" alt="lokasi"> Pedagang</span>
                 <span id="pedagang-name" style="font-weight:700;font-size:13px;">–</span>
             </div>
         </header>
@@ -47,24 +47,20 @@
             <div id="tab-overview" class="tab-content active">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">🏪</div>
                         <div class="stat-info"><h3 id="s-total">0</h3><p>Total Warung</p></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">✅</div>
                         <div class="stat-info"><h3 id="s-aktif">0</h3><p>Warung Aktif</p></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">⭐</div>
-                        <div class="stat-info"><h3 id="s-rating">–</h3><p>Rating Rata-rata</p></div>
+                        <div class="stat-info"><img src="assets/8-star.png" class="simbol" alt="lokasi"><h3 id="s-rating">–</h3><p>Rating Rata-rata</p></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">❤️</div>
-                        <div class="stat-info"><h3 id="s-fav">0</h3><p>Difavoritkan</p></div>
+                        <div class="stat-info"><img src="assets/5.bookmark.png" class="simbol" alt="lokasi"><h3 id="s-fav">0</h3><p>Difavoritkan</p></div>
                     </div>
                 </div>
                 <div class="card-panel">
-                    <h2>🏪 Warung Saya</h2>
+                    <h2> Warung Saya</h2>
                     <div class="card-container" id="my-warung-cards"></div>
                 </div>
             </div>
