@@ -27,7 +27,7 @@ switch ($action) {
         $hashed = password_hash($password, PASSWORD_DEFAULT);
         try {
             $stmt = $pdo->prepare("INSERT INTO users (nama, email, password, role, toko) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$nama, $email, $hashed, $role, $toko]);
+            $stmt->execute([$nama, $email, $password, $role, $toko]);
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
             echo json_encode(['error' => 'Email sudah terdaftar']);
@@ -40,7 +40,7 @@ switch ($action) {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && $password === $user['password']) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['nama'] = $user['nama'];
             $_SESSION['role'] = $user['role'];
@@ -135,9 +135,10 @@ switch ($action) {
             $jam_tutup = $_POST['jam_tutup'] ?? null;
             $hari_kerja = $_POST['hari_kerja'] ?? '';
             $img = $_POST['img'] ?? '';
+            $wa  = $_POST['wa'] ?? '';
             if ($id) {
-                $sql = "UPDATE warung SET nama=?, kategori=?, lokasi=?, harga=?, deskripsi=?, lat=?, lng=?, jam_buka=?, jam_tutup=?, hari_kerja=?, img=? WHERE id=?";
-                $params = [$nama, $kategori, $lokasi, $harga, $deskripsi, $lat, $lng, $jam_buka, $jam_tutup, $hari_kerja, $img, $id];
+                $sql = "UPDATE warung SET nama=?, kategori=?, lokasi=?, harga=?, deskripsi=?, lat=?, lng=?, jam_buka=?, jam_tutup=?, hari_kerja=?, img=?, wa=? WHERE id=?";
+                $params = [$nama, $kategori, $lokasi, $harga, $deskripsi, $lat, $lng, $jam_buka, $jam_tutup, $hari_kerja, $img, $wa, $id];
                 if (!isAdmin()) {
                     $sql .= " AND pedagang_id=?";
                     $params[] = $_SESSION['user_id'];
@@ -146,8 +147,8 @@ switch ($action) {
                 $stmt->execute($params);
                 echo json_encode(['success' => true]);
             } else {
-                $stmt = $pdo->prepare("INSERT INTO warung (pedagang_id, nama, kategori, lokasi, harga, deskripsi, lat, lng, jam_buka, jam_tutup, hari_kerja, img) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-                $stmt->execute([$_SESSION['user_id'], $nama, $kategori, $lokasi, $harga, $deskripsi, $lat, $lng, $jam_buka, $jam_tutup, $hari_kerja, $img]);
+                $stmt = $pdo->prepare("INSERT INTO warung (pedagang_id, nama, kategori, lokasi, harga, deskripsi, lat, lng, jam_buka, jam_tutup, hari_kerja, img, wa) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                $stmt->execute([$_SESSION['user_id'], $nama, $kategori, $lokasi, $harga, $deskripsi, $lat, $lng, $jam_buka, $jam_tutup, $hari_kerja, $img, $wa]);
                 echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
             }
         } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {

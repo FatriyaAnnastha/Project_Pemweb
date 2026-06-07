@@ -22,7 +22,7 @@
         <nav class="sidebar-menu">
             <a href="#" class="active" onclick="showTab('overview', event)"> Dashboard</a>
             <a href="#" onclick="showTab('warung', event)"> Kelola Warung</a>
-            <a href="#" onclick="showTab('tambah', event)"> Tambah/Edit Warung</a>
+            <a href="#" onclick="showTab('tambah', event)"> Tambah Warung</a>
             <a href="#" onclick="showTab('profil', event)"> Profil Saya</a>
             <a href="beranda.html"> Lihat Beranda</a>
         </nav>
@@ -433,18 +433,30 @@ async function simpanWarung() {
     const latitude = document.getElementById('latitude').value;
     const longitude = document.getElementById('longitude').value;
     const editId = document.getElementById('edit-id').value;
+
     if (!namaWarung) { alert('Nama warung wajib diisi!'); return; }
     if (hariKerja.length === 0) { alert('Pilih minimal satu hari buka!'); return; }
     if (!jamBuka || !jamTutup) { alert('Jam buka dan tutup wajib diisi!'); return; }
     if (!latitude || !longitude) { alert('Pilih lokasi warung di peta terlebih dahulu!'); return; }
+
     const menuValid = menuItems.filter(m => m.nama.trim() !== '');
+
     const dataWarung = {
         nama: namaWarung, kategori, lokasi, harga, deskripsi, wa,
         jam_buka: jamBuka, jam_tutup: jamTutup, hari_kerja: hariKerja.join(','),
         lat: parseFloat(latitude), lng: parseFloat(longitude), img: gambarWarung
     };
+
     const result = await saveWarung(dataWarung, editId || null);
+
     if (result.success) {
+        const warungId = editId || result.id; // ← ambil ID warung
+
+        // ← TAMBAHAN: simpan semua menu
+        for (const m of menuValid) {
+            await addMenuItem(warungId, m.nama, parseFloat(m.harga) || 0, m.gambar || '');
+        }
+
         showToast(editId ? '✅ Warung berhasil diperbarui!' : '✅ Warung berhasil ditambahkan!');
         resetForm();
         await renderOverview();

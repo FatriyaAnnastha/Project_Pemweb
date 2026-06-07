@@ -31,10 +31,9 @@
         <input type="hidden" id="role" value="user">
 
         <div id="hint" style="font-size:11.5px;opacity:0.75;margin-bottom:10px;line-height:1.6;">
-            Demo: user@mail.com / 123
         </div>
 
-        <button class="btn-login" onclick="loginUser()">Masuk </button>
+        <button class="btn-login" onclick="doLogin()">Masuk </button>
 
         <div class="btn-login" style="margin-top: 12px;">
             <a href="beranda.html" style="color: white;">Kembali ke Beranda</a>
@@ -48,11 +47,6 @@
 
 <script src="app.js"></script>
 <script>
-const hints = {
-    user: 'Demo: user@gmail.com / 123 (tapi buat akun dulu)',
-    pedagang: 'Demo: pedagang@gmail.com / 123',
-    admin: 'Demo: admin@gmail.com / 123',
-};
 function setRoleTab(role, el) {
     document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
@@ -61,7 +55,7 @@ function setRoleTab(role, el) {
     document.getElementById('email').value = role + '@gmail.com';
     document.getElementById('password').value = '123';
 }
-async function loginUser() {
+async function doLogin() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const role = document.getElementById('role').value;

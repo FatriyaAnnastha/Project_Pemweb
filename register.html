@@ -26,7 +26,7 @@
         <input type="password" id="r-pass2" placeholder="Konfirmasi Password">
         <input type="hidden" id="r-role" value="user">
 
-        <button class="btn-login" onclick="registerUser()">Daftar Sekarang</button>
+        <button class="btn-login" onclick="doRegister()">Daftar Sekarang</button>
 
         <div class="btn-login" style="margin-top: 12px;">
             <a href="beranda.html" style="color: white;">Kembali ke Beranda</a>
@@ -45,7 +45,7 @@ function setRole(role, el) {
     el.classList.add('active');
     document.getElementById('r-role').value = role;
 }
-async function registerUser() {
+async function doRegister() {
     const nama = document.getElementById('r-nama').value.trim();
     const email = document.getElementById('r-email').value.trim();
     const pass = document.getElementById('r-pass').value;
