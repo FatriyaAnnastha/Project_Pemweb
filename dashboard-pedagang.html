@@ -250,7 +250,6 @@ window.addEventListener('load', async () => {
             if (!file) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
-                // Upload gambar ke server
                 const result = await uploadImage(file);
                 if (result.success) {
                     gambarWarung = result.path;
@@ -287,7 +286,11 @@ function tambahMenu() {
     menuItems.push({ nama: '', harga: '', gambar: '' });
     renderMenuList();
 }
-function hapusMenu(idx) {
+async function hapusMenu(idx) {
+    const m = menuItems[idx];
+    if (m.id) { 
+        await deleteMenuItem(m.id);
+    }
     menuItems.splice(idx, 1);
     renderMenuList();
 }
@@ -452,9 +455,10 @@ async function simpanWarung() {
     if (result.success) {
         const warungId = editId || result.id; // ← ambil ID warung
 
-        // ← TAMBAHAN: simpan semua menu
         for (const m of menuValid) {
-            await addMenuItem(warungId, m.nama, parseFloat(m.harga) || 0, m.gambar || '');
+            if (!m.id) { // hanya insert menu yang BARU (belum ada di database)
+                await addMenuItem(warungId, m.nama, parseFloat(m.harga) || 0, m.gambar || '');
+            }
         }
 
         showToast(editId ? '✅ Warung berhasil diperbarui!' : '✅ Warung berhasil ditambahkan!');
