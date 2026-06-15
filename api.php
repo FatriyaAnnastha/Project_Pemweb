@@ -27,7 +27,7 @@ switch ($action) {
         $hashed = password_hash($password, PASSWORD_DEFAULT);
         try {
             $stmt = $pdo->prepare("INSERT INTO users (nama, email, password, role, toko) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$nama, $email, $password, $role, $toko]);
+            $stmt->execute([$nama, $email, $hashed, $role, $toko]);
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
             echo json_encode(['error' => 'Email sudah terdaftar']);
@@ -353,7 +353,7 @@ switch ($action) {
         $toko = ($role == 'pedagang') ? strtolower(str_replace(' ', '_', $nama)) : null;
         try {
             $stmt = $pdo->prepare("INSERT INTO users (nama, email, password, role, toko) VALUES (?,?,?,?,?)");
-            $stmt->execute([$nama, $email, $hashed, $role, $toko]);
+            $stmt->execute([$nama, $email, $password, $role, $toko]);
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
             echo json_encode(['error' => 'Email sudah terdaftar']);
