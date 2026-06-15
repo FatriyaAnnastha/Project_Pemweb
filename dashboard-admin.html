@@ -21,6 +21,7 @@
             <a href="#" class="active" onclick="showTab('overview',this)">Dashboard</a>
             <a href="#" onclick="showTab('warung',this)"> Kelola Warung</a>
             <a href="#" onclick="showTab('users',this)"> Manajemen User</a>
+            <a href="#" onclick="showTab('pending',this)"> Persetujuan <span id="pending-badge" style="background:#e74c3c;color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;display:none;">0</span></a>
             <a href="#" onclick="showTab('laporan',this)">Laporan</a>
             <a href="beranda.html">Lihat Beranda</a>
         </nav>
@@ -121,6 +122,21 @@
                 </div>
             </div>
 
+            <!-- TAB: PENDING -->
+            <div id="tab-pending" class="tab-content">
+                <div class="card-panel">
+                    <h2>⏳ Warung Menunggu Persetujuan</h2>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr>
+                                <th>Nama Warung</th><th>Kategori</th><th>Lokasi</th>
+                                <th>Pedagang</th><th>Deskripsi</th><th>Aksi</th>
+                            </tr></thead>
+                            <tbody id="pending-warung-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             <!-- TAB: LAPORAN -->
             <div id="tab-laporan" class="tab-content">
                 <div class="stats-grid">
@@ -166,6 +182,7 @@ async function renderAll() {
     await renderStats();
     await renderTopWarung();
     await renderAdminWarung();
+    await renderPending(); 
     await renderUsers();
     await renderLaporan();
 }
@@ -280,8 +297,35 @@ function showTab(name, el) {
     document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
     document.getElementById('tab-'+name).classList.add('active');
     if (el) el.classList.add('active');
-    const titles = { overview:'📊 Dashboard', warung:'🏪 Semua Warung', users:'👥 Manajemen User', laporan:'📋 Laporan' };
+    const titles = { overview:'📊 Dashboard', warung:'🏪 Semua Warung', pending:'⏳ Persetujuan Warung',users:'👥 Manajemen User', laporan:'📋 Laporan' };
     document.getElementById('page-title').textContent = titles[name] || '';
+}
+
+async function renderPending() {
+    const list = await getPendingWarung();
+    const badge = document.getElementById('pending-badge');
+    badge.textContent = list.length;
+    badge.style.display = list.length > 0 ? 'inline' : 'none';
+    document.getElementById('pending-warung-body').innerHTML = list.length
+        ? list.map(w => `
+            <tr>
+                <td><strong>${w.nama}</strong></td>
+                <td>${w.kategori}</td><td>${w.lokasi}</td>
+                <td>${w.pedagang_nama}</td>
+                <td style="font-size:12px;max-width:180px;">${w.deskripsi||'–'}</td>
+                <td style="display:flex;gap:6px;">
+                    <button class="btn btn-sm btn-primary" onclick="doApprove(${w.id},true)">✅ Setujui</button>
+                    <button class="btn btn-sm" style="background:#fdecea;color:#e74c3c;" onclick="doApprove(${w.id},false)">❌ Tolak</button>
+                </td>
+            </tr>`).join('')
+        : '<tr><td colspan="6" style="text-align:center;color:#aaa;">Tidak ada warung menunggu persetujuan</td></tr>';
+}
+
+async function doApprove(id, approve) {
+    if (!confirm(`Yakin ${approve ? 'menyetujui' : 'menolak'} warung ini?`)) return;
+    await approveWarung(id, approve);
+    showToast(approve ? '✅ Warung disetujui!' : '❌ Warung ditolak');
+    renderAll();
 }
 </script>
 </body>

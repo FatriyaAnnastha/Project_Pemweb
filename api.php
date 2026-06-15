@@ -147,7 +147,7 @@ switch ($action) {
                 $stmt->execute($params);
                 echo json_encode(['success' => true]);
             } else {
-                $stmt = $pdo->prepare("INSERT INTO warung (pedagang_id, nama, kategori, lokasi, harga, deskripsi, lat, lng, jam_buka, jam_tutup, hari_kerja, img, wa) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                $stmt = $pdo->prepare("INSERT INTO warung (pedagang_id, nama, kategori, lokasi, harga, deskripsi, lat, lng, jam_buka, jam_tutup, hari_kerja, img, wa, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, 'pending')");
                 $stmt->execute([$_SESSION['user_id'], $nama, $kategori, $lokasi, $harga, $deskripsi, $lat, $lng, $jam_buka, $jam_tutup, $hari_kerja, $img, $wa]);
                 echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
             }
@@ -172,7 +172,31 @@ switch ($action) {
             echo json_encode(['success' => true]);
         }
         break;
-        
+    case 'all_warung':
+        requireLogin();
+        if (!isAdmin()) { echo json_encode(['error' => 'Hanya admin']); break; }
+        $stmt = $pdo->query("SELECT w.*, u.nama as pedagang_nama FROM warung w JOIN users u ON w.pedagang_id = u.id ORDER BY w.id DESC");
+        echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+        break;
+
+    case 'pending_warung':
+        requireLogin();
+        if (!isAdmin()) { echo json_encode(['error' => 'Hanya admin']); break; }
+        $stmt = $pdo->query("SELECT w.*, u.nama as pedagang_nama FROM warung w JOIN users u ON w.pedagang_id = u.id WHERE w.status = 'pending' ORDER BY w.id DESC");
+        echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+        break;
+
+    case 'approve_warung':
+        requireLogin();
+        if (!isAdmin()) { echo json_encode(['error' => 'Hanya admin']); break; }
+        $id = $_POST['id'] ?? null;
+        $approve = $_POST['approve'] ?? '1';
+        $newStatus = ($approve === '1') ? 'aktif' : 'nonaktif';
+        $stmt = $pdo->prepare("UPDATE warung SET status = ? WHERE id = ?");
+        $stmt->execute([$newStatus, $id]);
+        echo json_encode(['success' => true, 'status' => $newStatus]);
+        break;  
+
     case 'my_warung':
         requireLogin();
         if (!isPedagang()) {

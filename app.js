@@ -79,6 +79,24 @@ async function getWarung(filters = {}) {
     return res.json();
 }
 
+async function getAllWarung() {
+    const res = await fetch(`${API_BASE}?action=all_warung`);
+    return res.json();
+}
+
+async function getPendingWarung() {
+    const res = await fetch(`${API_BASE}?action=pending_warung`);
+    return res.json();
+}
+
+async function approveWarung(id, approve) {
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('approve', approve ? '1' : '0');
+    const res = await fetch(`${API_BASE}?action=approve_warung`, { method: 'POST', body: formData });
+    return res.json();
+}
+
 async function getWarungDetail(id) {
     const res = await fetch(`${API_BASE}?action=warung&id=${id}`);
     return res.json();
