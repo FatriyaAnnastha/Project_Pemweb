@@ -47,7 +47,7 @@
         </span>
 
         <a href="login.html" onclick="handleAuth()">
-            <img src="assets/6.login-avatar.png" class="simbol" alt="lokasi"> <span id="auth-label">Login</span>
+            <img src="assets/6.login-avatar.png" class="simbol" alt="user"> <span id="auth-label">Login</span>
         </a>
     </div>
 
@@ -195,7 +195,7 @@ async function renderWarung() {
     let list = await getWarung({ q, harga, lokasi, kategori: kat });
     const container = document.getElementById('warung-list');
     if (list.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="big-icon">🍽️</div><p>Tidak ada tempat makan yang ditemukan.</p></div>`;
+        container.innerHTML = `<div class="empty-state"><div class="big-icon"><img src="assets/17-utensils.png" class="cari" alt="search"></div><p>Tidak ada tempat makan yang ditemukan.</p></div>`;
         return;
     }
     const session = await checkSession();
@@ -206,8 +206,8 @@ async function renderWarung() {
         const sudahFavorit = favIds.includes(w.id);
         const statusBuka = cekStatusBuka(w);
         let chipStatus = '';
-        if (statusBuka === true) chipStatus = `<span class="info-chip chip-buka">🟢 Buka</span>`;
-        else if (statusBuka === false) chipStatus = `<span class="info-chip chip-tutup">🔴 Tutup</span>`;
+        if (statusBuka === true) chipStatus = `<span class="info-chip chip-buka">Buka</span>`;
+        else if (statusBuka === false) chipStatus = `<span class="info-chip chip-tutup">Tutup</span>`;
         let chipJam = (w.jam_buka && w.jam_tutup) ? `<span class="info-chip">🕐 ${w.jam_buka}–${w.jam_tutup}</span>` : '';
         let chipHari = (w.hari_kerja) ? `<span class="info-chip">📅 ${w.hari_kerja}</span>` : '';
         let chipWA = (w.wa) ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" class="info-chip chip-wa">💬 WhatsApp</a>` : '';
@@ -232,9 +232,9 @@ async function renderWarung() {
                 <div class="info-strip">${chipStatus}${chipJam}${chipHari}${chipWA}</div>
                 ${previewMenu}
                 <div class="card-actions">
-                    <button class="btn btn-sm btn-outline" onclick="bukaDetail(${w.id})">📋 Detail</button>
-                    <button class="btn btn-sm ${sudahFavorit ? 'btn-primary' : 'btn-outline'}" id="fav-btn-${w.id}" onclick="toggleFavoritDanUpdate(${w.id}, '${w.nama}')">❤️ ${sudahFavorit ? 'Difavoritkan' : 'Favorit'}</button>
-                    <a href="${lokasiUrl}" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;">📍 Lokasi</a>
+                    <button class="btn btn-sm btn-outline" onclick="bukaDetail(${w.id})"> Detail</button>
+                    <button class="btn btn-sm ${sudahFavorit ? 'btn-primary' : 'btn-outline'}" id="fav-btn-${w.id}" onclick="toggleFavoritDanUpdate(${w.id}, '${w.nama}')"> ${sudahFavorit ? 'Difavoritkan' : 'Favorit'}</button>
+                    <a href="${lokasiUrl}" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;"> Lokasi</a>
                 </div>
             </div>
         </div>`;
@@ -270,7 +270,7 @@ async function bukaDetail(id) {
     const w = await getWarungDetail(id);
     if (!w || w.error) { showToast('Gagal memuat detail'); return; }
     const statusBuka = cekStatusBuka(w);
-    const statusTeks = statusBuka === true ? '<span class="status-buka">🟢 Sedang Buka</span>' : (statusBuka === false ? '<span class="status-tutup">🔴 Sedang Tutup</span>' : '');
+    const statusTeks = statusBuka === true ? '<span class="status-buka">Sedang Buka</span>' : (statusBuka === false ? '<span class="status-tutup">Sedang Tutup</span>' : '');
     const lokasiUrl = (w.lat && w.lng) ? `https://www.google.com/maps?q=${w.lat},${w.lng}` : `https://www.google.com/maps/search/${encodeURIComponent(w.nama+' '+w.lokasi)}`;
     const menuHtml = (w.menu && w.menu.length > 0) ? `
         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
@@ -287,7 +287,7 @@ async function bukaDetail(id) {
         </div>
     ` : '<p style="color:#aaa;font-size:13px;">Belum ada menu tersedia.</p>';
     const hariHtml = w.hari_kerja || '–';
-    const waHtml = w.wa ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" style="color:#1565c0;">💬 Chat WhatsApp (${w.wa})</a>` : '–';
+    const waHtml = w.wa ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" style="color:#1565c0;">Chat WhatsApp (${w.wa})</a>` : '–';
     const reviews = w.reviews || [];
     const avgRating = w.rating || 0;
     const reviewListHtml = reviews.length ? reviews.map(rv => `
@@ -300,7 +300,7 @@ async function bukaDetail(id) {
     const session = await checkSession();
     const isUser = session && session.role === 'user';
     const formReview = isUser ? `
-        <hr style="margin:12px 0;"><h4>➕ Tambah Ulasan</h4>
+        <hr style="margin:12px 0;"><h4>Tambah Ulasan</h4>
         <div style="margin-bottom:8px;"><label>Rating: </label>
         <select id="review-rating" style="padding:6px;border-radius:8px;">
             <option value="">-- Pilih --</option>
@@ -316,19 +316,19 @@ async function bukaDetail(id) {
         <h2 style="margin:0 0 4px;">${w.nama}</h2>
         <p style="color:#888;font-size:13px;margin:0 0 10px;">${w.kategori} • ${w.harga} • ${w.lokasi}</p>
         ${statusTeks ? `<p style="margin:0 0 10px;">${statusTeks}</p>` : ''}
-        <p style="margin:0 0 6px;"><strong>⭐ Rating:</strong> ${avgRating} ${renderStars(avgRating)}</p>
+        <p style="margin:0 0 6px;"><strong><img src="assets/8-star-1.png" class="info" alt="rating"> Rating:</strong> ${avgRating} ${renderStars(avgRating)}</p>
         ${w.deskripsi ? `<p style="font-size:13px;color:#555;margin:0 0 12px;">${w.deskripsi}</p>` : ''}
         <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:14px;">
-            <div>🕐 <strong>Jam Buka:</strong> ${w.jam_buka || '–'} – ${w.jam_tutup || '–'}</div>
-            <div>📅 <strong>Hari Buka:</strong> ${hariHtml}</div>
-            <div>📞 <strong>Kontak:</strong> ${waHtml}</div>
+            <div><img src="assets/14-clock.png" class="info" alt="clock"> <strong>Jam Buka:</strong> ${w.jam_buka || '–'} – ${w.jam_tutup || '–'}</div>
+            <div><img src="assets/15-calendar.png" class="info" alt="calendar"> <strong>Hari Buka:</strong> ${hariHtml}</div>
+            <div><img src="assets/13-contact-us.png" class="info" alt="contact"> <strong>Kontak:</strong> ${waHtml}</div>
         </div>
-        <h4 style="margin:0 0 6px;">🍽️ Menu</h4>${menuHtml}
-        <hr style="margin:12px 0;"><h4>📝 Ulasan (${reviews.length})</h4>
+        <h4 style="margin:0 0 6px;"><img src="assets/17-utensils.png" class="info" alt="carimakan"> Menu</h4>${menuHtml}
+        <hr style="margin:12px 0;"><h4><img src="assets/16-review.png" class="info" alt="review"> Ulasan (${reviews.length})</h4>
         <div style="max-height:200px; overflow-y:auto; margin-bottom:12px;">${reviewListHtml}</div>
         ${formReview}
         <div style="display:flex;gap:10px;margin-top:16px;">
-            <a href="${lokasiUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none;flex:1;text-align:center;">📍 Lihat di Maps</a>
+            <a href="${lokasiUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none;flex:1;text-align:center;"><img src="assets/9-pointer-on-map.png" class="info" alt="lokasi"> Lihat di Maps</a>
             ${w.wa ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" class="btn btn-outline" style="text-decoration:none;flex:1;text-align:center;">💬 WhatsApp</a>` : ''}
         </div>
     `;
@@ -348,7 +348,7 @@ async function toggleFavoritDanUpdate(id, nama) {
     const btn = document.getElementById('fav-btn-' + id);
     if (btn) {
         btn.className = `btn btn-sm ${sudahFavorit ? 'btn-primary' : 'btn-outline'}`;
-        btn.innerHTML = `❤️ ${sudahFavorit ? 'Difavoritkan' : 'Favorit'}`;
+        btn.innerHTML = `${sudahFavorit ? 'Difavoritkan' : 'Favorit'}`;
     }
     showToast(sudahFavorit ? `❤️ ${nama} ditambahkan ke favorit` : `💔 ${nama} dihapus dari favorit`);
 }

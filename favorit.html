@@ -18,13 +18,13 @@
         <a href="beranda.html">Beranda</a>
         <a href="favorit.html" class="active"> Favorit</a>
         <a href="#" onclick="if(getSession()){logout()}else{location.href='login.html'}">
-            👤 <span id="auth-label">Login</span>
+           <img src="assets/6.login-avatar.png" class="simbol" alt="user"> <span id="auth-label">Login</span>
         </a>
     </div>
 </nav>
 
 <section class="container">
-    <h2 class="section-title">❤️ Daftar <span>Favorit</span> Saya</h2>
+    <h2 class="section-title">Daftar <span>Favorit</span> Saya</h2>
     <div class="card-container" id="fav-list"></div>
 </section>
 
@@ -52,7 +52,7 @@ async function renderFavorit() {
                 <p>⭐ ${w.rating} | ${w.lokasi}</p>
                 <p style="font-size:11.5px;color:#aaa;margin-bottom:6px">${w.kategori} • ${w.harga}</p>
                 <div class="card-actions">
-                    <button class="btn btn-sm btn-primary" onclick="hapusFavorit(${w.id}, '${w.nama}')">❤️ Hapus</button>
+                    <button class="btn btn-sm btn-primary" onclick="hapusFavorit(${w.id}, '${w.nama}')">Hapus</button>
                 </div>
             </div>
         </div>

@@ -36,7 +36,7 @@
         <header class="main-header">
             <h1 id="page-title">Dashboard</h1>
             <div style="display:flex;align-items:center;gap:12px;">
-                <span class="role-badge pedagang"><img src="assets/6.login-avatar.png" class="logout" alt="lokasi"> Pedagang</span>
+                <span class="role-badge pedagang"><img src="assets/6.login-avatar.png" class="logout" alt="user"> Pedagang</span>
                 <span id="pedagang-name" style="font-weight:700;font-size:13px;">–</span>
             </div>
         </header>
@@ -326,7 +326,7 @@ function showTab(name, event) {
     document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
     const titles = { overview:'📊 Ringkasan', warung:'🏪 Kelola Warung', tambah:'➕ Tambah/Edit Warung', profil:'👤 Profil Saya' };
-    document.getElementById('page-title').innerHTML = `<img src="assets/11-dashboard.png" class="simbol" alt="lokasi"> ${titles[name] || ''}`;
+    document.getElementById('page-title').innerHTML = ` ${titles[name] || ''}`;
     if (event && event.currentTarget) event.currentTarget.classList.add('active');
     if (name === 'tambah') setTimeout(() => initLeafletMap(), 150);
 }
