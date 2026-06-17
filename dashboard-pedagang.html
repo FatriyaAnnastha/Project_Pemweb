@@ -27,7 +27,7 @@
             <a href="beranda.html"> Lihat Beranda</a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" onclick="logout()" style="color:rgba(255,255,255,0.4);text-decoration:none;font-size:12px;"><img src="assets/7.Logout.png" class="logout" alt="lokasi"> Logout</a>
+            <a href="#" onclick="logoutUser()" style="color:rgba(255,255,255,0.4);text-decoration:none;font-size:12px;"><img src="assets/7.Logout.png" class="logout" alt="lokasi"> Logout</a>
         </div>
     </aside>
 
@@ -355,10 +355,15 @@ async function renderOverview() {
                 <p>⭐ ${w.rating || 0} | ${w.lokasi}</p>
                 ${w.jam_buka ? `<p style="font-size:11.5px;color:#aaa;">🕐 ${w.jam_buka} – ${w.jam_tutup}</p>` : ''}
                 ${w.wa ? `<p style="font-size:11.5px;color:#aaa;">📞 ${w.wa}</p>` : ''}
-                <p style="font-size:11.5px;color:#aaa;margin-bottom:8px">${w.status === 'aktif' ? '✅ Aktif' : '⛔ Nonaktif'}</p>
+                <p style="font-size:11.5px;font-weight:600;margin-bottom:8px;color:${w.status === 'tunggu' ? '#e67e22' : (w.status === 'aktif' ? '#27ae60' : '#e74c3c')}">
+                    ${w.status === 'tunggu' ? '⏳ Menunggu Persetujuan' : (w.status === 'aktif' ? '✅ Aktif' : '⛔ Nonaktif')}
+                </p>
                 <div class="card-actions">
                     <button class="btn btn-sm btn-primary" onclick="editWarung(${w.id})">✏️ Edit</button>
-                    <button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">${w.status === 'aktif' ? '⛔ Nonaktifkan' : '✅ Aktifkan'}</button>
+                    ${w.status === 'tunggu' 
+                        ? `<button class="btn btn-sm btn-outline" disabled style="opacity:0.5;cursor:not-allowed;">⏳ tunggu</button>`
+                        : `<button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">${w.status === 'aktif' ? '⛔ Nonaktifkan' : '✅ Aktifkan'}</button>`
+                    }
                 </div>
             </div>
         </div>`).join('');
@@ -372,10 +377,17 @@ async function renderWarungTable() {
             <td><strong>${w.nama}</strong></td>
             <td>${w.kategori}</td><td>${w.lokasi}</td><td>${w.harga}</td>
             <td>⭐ ${w.rating || 0}</td>
-            <td><span class="badge ${w.status==='aktif'?'badge-green':'badge-red'}">${w.status}</span></td>
+            <td>
+                <span class="badge ${w.status === 'tunggu' ? 'badge-yellow' : (w.status === 'aktif' ? 'badge-green' : 'badge-red')}">
+                    ${w.status}
+                </span>
+            </td>
             <td style="display:flex;gap:6px;">
                 <button class="btn btn-sm btn-warning" onclick="editWarung(${w.id})">✏️</button>
-                <button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">${w.status==='aktif'?'⛔':'✅'}</button>
+                ${w.status === 'tunggu'
+                    ? `<button class="btn btn-sm btn-outline" disabled style="opacity:0.5;cursor:not-allowed;">⏳</button>`
+                    : `<button class="btn btn-sm btn-outline" onclick="toggleStatus(${w.id})">${w.status === 'aktif' ? '⛔' : '✅'}</button>`
+                }
                 <button class="btn btn-sm" style="background:#fdecea;color:#e74c3c;" onclick="hapusWarung(${w.id})">🗑️</button>
             </td>
         </tr>
@@ -496,6 +508,8 @@ async function toggleStatus(id) {
         await renderOverview();
         await renderWarungTable();
         showToast('Status warung diperbarui!');
+    } else {
+        showToast('❌ ' + result.error);
     }
 }
 async function hapusWarung(id) {

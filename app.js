@@ -84,8 +84,8 @@ async function getAllWarung() {
     return res.json();
 }
 
-async function getPendingWarung() {
-    const res = await fetch(`${API_BASE}?action=pending_warung`);
+async function gettungguWarung() {
+    const res = await fetch(`${API_BASE}?action=tunggu_warung`);
     return res.json();
 }
 

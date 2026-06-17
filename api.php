@@ -146,7 +146,7 @@ switch ($action) {
                 $stmt->execute($params);
                 echo json_encode(['success' => true]);
             } else {
-                $stmt = $pdo->prepare("INSERT INTO warung (pedagang_id, nama, kategori, lokasi, harga, deskripsi, lat, lng, jam_buka, jam_tutup, hari_kerja, img, wa, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, 'pending')");
+                $stmt = $pdo->prepare("INSERT INTO warung (pedagang_id, nama, kategori, lokasi, harga, deskripsi, lat, lng, jam_buka, jam_tutup, hari_kerja, img, wa, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, 'tunggu')");
                 $stmt->execute([$_SESSION['user_id'], $nama, $kategori, $lokasi, $harga, $deskripsi, $lat, $lng, $jam_buka, $jam_tutup, $hari_kerja, $img, $wa]);
                 echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
             }
@@ -178,10 +178,10 @@ switch ($action) {
         echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
         break;
 
-    case 'pending_warung':
+    case 'tunggu_warung':
         requireLogin();
         if (!isAdmin()) { echo json_encode(['error' => 'Hanya admin']); break; }
-        $stmt = $pdo->query("SELECT w.*, u.nama as pedagang_nama FROM warung w JOIN users u ON w.pedagang_id = u.id WHERE w.status = 'pending' ORDER BY w.id DESC");
+        $stmt = $pdo->query("SELECT w.*, u.nama as pedagang_nama FROM warung w JOIN users u ON w.pedagang_id = u.id WHERE w.status = 'tunggu' ORDER BY w.id DESC");
         echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
         break;
 
@@ -233,6 +233,10 @@ switch ($action) {
         $row = $stmt->fetch();
         if (!$row) {
             echo json_encode(['error' => 'Warung tidak ditemukan']);
+            break;
+        }
+        if (!isAdmin() && $row['status'] === 'tunggu') {
+            echo json_encode(['error' => 'Warung masih menunggu persetujuan Admin.']);
             break;
         }
         $newStatus = ($row['status'] === 'aktif') ? 'nonaktif' : 'aktif';
