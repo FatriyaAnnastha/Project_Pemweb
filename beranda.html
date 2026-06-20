@@ -36,7 +36,7 @@
 
     <div class="nav-right">
         <a href="beranda.html" class="active">Beranda</a>
-        <a href="favorit.html">Favorit</a>
+        <a href="#" onclick="bukaFavorit(event)">Favorit</a>
 
         <a href="#" id="dashboard-link" style="display:none;">
             Dashboard
@@ -344,13 +344,43 @@ document.getElementById('modal-detail').addEventListener('click', function(e) {
 
 async function toggleFavoritDanUpdate(id, nama) {
     const result = await toggleFavorite(id);
-    const sudahFavorit = result.action === 'added';
-    const btn = document.getElementById('fav-btn-' + id);
-    if (btn) {
-        btn.className = `btn btn-sm ${sudahFavorit ? 'btn-primary' : 'btn-outline'}`;
-        btn.innerHTML = `${sudahFavorit ? 'Difavoritkan' : 'Favorit'}`;
+
+    if (!result.success) {
+        showToast(result.message || '❌Silakan login terlebih dahulu');
+        return;
     }
-    showToast(sudahFavorit ? `❤️ ${nama} ditambahkan ke favorit` : `💔 ${nama} dihapus dari favorit`);
+
+    const sudahFavorit = result.action === 'added';
+
+    const btn = document.getElementById('fav-btn-' + id);
+
+    if (btn) {
+        btn.className = `btn btn-sm ${
+            sudahFavorit ? 'btn-primary' : 'btn-outline'
+        }`;
+
+        btn.innerHTML = sudahFavorit
+            ? 'Difavoritkan'
+            : 'Favorit';
+    }
+
+    showToast(
+        sudahFavorit
+            ? `❤️ ${nama} ditambahkan ke favorit`
+            : `💔 ${nama} dihapus dari favorit`
+    );
+}
+async function bukaFavorit(e) {
+    e.preventDefault();
+
+    const session = await checkSession();
+
+    if (!session) {
+        showToast('🔒 Silakan login terlebih dahulu');
+        return;
+    }
+
+    window.location.href = 'favorit.html';
 }
 </script>
 
