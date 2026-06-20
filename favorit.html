@@ -17,7 +17,7 @@
     <div class="nav-right">
         <a href="beranda.html">Beranda</a>
         <a href="favorit.html" class="active"> Favorit</a>
-        <a href="#" onclick="if(getSession()){logout()}else{location.href='login.html'}">
+        <a href="#" onclick="if(checkSession()){logoutUser()}else{location.href='login.html'}">
            <img src="assets/6.login-avatar.png" class="simbol" alt="user"> <span id="auth-label">Login</span>
         </a>
     </div>
