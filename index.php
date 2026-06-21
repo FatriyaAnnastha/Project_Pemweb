@@ -1,10 +1,13 @@
+<?php
+require_once 'backend/session_config.php';
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beranda – CariMakan.ID</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
@@ -35,7 +38,7 @@
     </div>
 
     <div class="nav-right">
-        <a href="beranda.html" class="active">Beranda</a>
+        <a href="index.php" class="active">Beranda</a>
         <a href="#" onclick="bukaFavorit(event)">Favorit</a>
 
         <a href="#" id="dashboard-link" style="display:none;">
@@ -46,7 +49,7 @@
             Tamu
         </span>
 
-        <a href="login.html" onclick="handleAuth()">
+        <a href="login.php" onclick="handleAuth()">
             <img src="assets/6.login-avatar.png" class="simbol" alt="user"> <span id="auth-label">Login</span>
         </a>
     </div>
@@ -82,9 +85,13 @@
         
         <select id="filter-kategori" onchange="renderWarung()">
             <option value="">Semua Kategori</option>
-            <option>Makanan Berat</option>
-            <option>Snack</option>
-            <option>Minuman</option>
+            <option>Bakso</option>
+            <option>Mie Ayam</option>
+            <option>Ayam</option>
+            <option>Sate</option>
+            <option>Seafood</option>
+            <option>Nasi</option>
+            <option>Lainnya</option>
         </select>
         
         <input
@@ -128,7 +135,7 @@
 </footer>
 
 <!-- JS EKSTERNAL -->
-<script src="app.js"></script>
+<script src="assets/js/app.js"></script>
 <script>
 window.addEventListener('load', async () => {
     const session = await checkSession();
@@ -138,7 +145,7 @@ window.addEventListener('load', async () => {
         const dashboardLink = document.getElementById('dashboard-link');
         if (session.role !== 'user') {
             dashboardLink.style.display = 'inline-block';
-            dashboardLink.href = session.role === 'admin' ? 'dashboard-admin.html' : 'dashboard-pedagang.html';
+            dashboardLink.href = session.role === 'admin' ? 'admin/index.php' : 'pedagang/index.php';
         } else {
             dashboardLink.style.display = 'none';
         }
@@ -170,7 +177,7 @@ function handleAuth() {
     (async () => {
         const session = await checkSession();
         if (session) logoutUser();
-        else window.location.href = 'login.html';
+        else window.location.href = 'login.php';
     })();
 }
 
@@ -215,8 +222,8 @@ async function renderWarung() {
         if (w.menu && w.menu.length > 0) {
             const tampil = w.menu.slice(0, 2).map(m => `
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-                    <img src="${m.gambar || '4.bakso.jpeg'}" alt="${m.nama}"
-                        onerror="this.src='4.bakso.jpeg'"
+                    <img src="${m.gambar || 'assets/2.background.jpg'}" alt="${m.nama}"
+                        onerror="this.src='assets/2.background.jpg'"
                         style="width:36px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0;">
                     <span style="font-size:11px;color:#555;">${m.nama}${m.harga ? ' – Rp'+Number(m.harga).toLocaleString('id-ID') : ''}</span>
                 </div>`).join('');
@@ -224,7 +231,7 @@ async function renderWarung() {
             previewMenu = `<div style="margin:4px 0 8px;">${tampil}${sisanya}</div>`;
         }
         return `<div class="card" id="card-${w.id}">
-            <img src="${w.img || '4.bakso.jpeg'}" alt="${w.nama}" onerror="this.src='4.bakso.jpeg'">
+            <img src="${w.img || 'assets/2.background.jpg'}" alt="${w.nama}" onerror="this.src='assets/2.background.jpg'">
             <div class="card-body">
                 <h3>${w.nama}</h3>
                 <p>⭐ ${w.rating || 0} | ${w.lokasi}</p>
@@ -276,8 +283,8 @@ async function bukaDetail(id) {
         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
             ${w.menu.map(m => `
                 <div style="display:flex;align-items:center;gap:10px;background:#f9f7f5;border-radius:8px;padding:6px 8px;">
-                    <img src="${m.gambar || '4.bakso.jpeg'}" alt="${m.nama}"
-                        onerror="this.src='4.bakso.jpeg'"
+                    <img src="${m.gambar || 'assets/2.background.jpg'}" alt="${m.nama}"
+                        onerror="this.src='assets/2.background.jpg'"
                         style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;">
                     <div>
                         <div style="font-size:13px;font-weight:600;">${m.nama}</div>
@@ -312,7 +319,7 @@ async function bukaDetail(id) {
         <button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="submitReview(${id})">Kirim Ulasan</button>
     ` : (session ? '<p style="font-size:12px; color:#aaa;">⭐ Ulasan hanya untuk pengguna biasa.</p>' : '<p style="font-size:12px; color:#aaa;">🔒 Login sebagai pengguna untuk memberi ulasan.</p>');
     document.getElementById('modal-content').innerHTML = `
-        <img src="${w.img || '4.bakso.jpeg'}" alt="${w.nama}" onerror="this.src='4.bakso.jpeg'" style="width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:14px;">
+        <img src="${w.img || 'assets/2.background.jpg'}" alt="${w.nama}" onerror="this.src='assets/2.background.jpg'" style="width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:14px;">
         <h2 style="margin:0 0 4px;">${w.nama}</h2>
         <p style="color:#888;font-size:13px;margin:0 0 10px;">${w.kategori} • ${w.harga} • ${w.lokasi}</p>
         ${statusTeks ? `<p style="margin:0 0 10px;">${statusTeks}</p>` : ''}
@@ -346,7 +353,7 @@ async function toggleFavoritDanUpdate(id, nama) {
     const result = await toggleFavorite(id);
 
     if (!result.success) {
-        showToast(result.message || '❌Silakan login terlebih dahulu');
+        showToast('❌ Silakan login terlebih dahulu');
         return;
     }
 
@@ -380,7 +387,7 @@ async function bukaFavorit(e) {
         return;
     }
 
-    window.location.href = 'favorit.html';
+    window.location.href = 'favorit.php';
 }
 </script>
 

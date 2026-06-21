@@ -1,5 +1,11 @@
 <?php
-require_once 'config.php';
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') exit(0);
+
+require_once 'session_config.php';
 
 $action = $_GET['action'] ?? '';
 
@@ -44,6 +50,7 @@ switch ($action) {
             $_SESSION['nama'] = $user['nama'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['toko'] = $user['toko'];
+            $_SESSION['email'] = $user['email']; // Ditambahkan agar profil.php pedagang bisa baca email dari session
             echo json_encode(['success' => true, 'role' => $user['role']]);
         } else {
             echo json_encode(['error' => 'Email atau password salah']);
@@ -312,11 +319,11 @@ switch ($action) {
         if ($stmt->fetch()) {
             $stmtDel = $pdo->prepare("DELETE FROM favorites WHERE user_id = ? AND warung_id = ?");
             $stmtDel->execute([$_SESSION['user_id'], $warung_id]);
-            echo json_encode(['action' => 'removed']);
+            echo json_encode(['action' => 'removed', 'success' => true]);
         } else {
             $stmtIns = $pdo->prepare("INSERT INTO favorites (user_id, warung_id) VALUES (?,?)");
             $stmtIns->execute([$_SESSION['user_id'], $warung_id]);
-            echo json_encode(['action' => 'added']);
+            echo json_encode(['action' => 'added', 'success' => true]);
         }
         break;
         

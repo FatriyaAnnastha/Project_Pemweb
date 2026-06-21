@@ -31,8 +31,10 @@ function getLocation() {
     } else { el.textContent = 'Mataram'; }
 }
 
-// ── API BASE URL
-const API_BASE = 'api.php';
+// ── API BASE URL (DYNAMIC BASED ON DIRECTORY DEPTH)
+const isSubdir = window.location.pathname.includes('/admin/') || window.location.pathname.includes('/pedagang/');
+const API_BASE = isSubdir ? '../backend/api.php' : 'backend/api.php';
+const UPLOAD_BASE = isSubdir ? '../backend/upload.php' : 'backend/upload.php';
 
 // ── SESSION & AUTH (via backend)
 async function checkSession() {
@@ -65,7 +67,8 @@ async function registerUser(nama, email, password, role) {
 
 async function logoutUser() {
     await fetch(`${API_BASE}?action=logout`);
-    window.location.href = 'login.html';
+    const isSub = window.location.pathname.includes('/admin/') || window.location.pathname.includes('/pedagang/');
+    window.location.href = isSub ? '../login.php' : 'login.php';
 }
 
 // ── WARUNG
@@ -190,7 +193,7 @@ async function deleteUser(userId) {
 async function uploadImage(file) {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch('upload.php', { method: 'POST', body: formData });
+    const res = await fetch(UPLOAD_BASE, { method: 'POST', body: formData });
     return res.json();
 }
 
@@ -207,8 +210,9 @@ window.addEventListener('load', async () => {
         const dashboardLink = document.getElementById('dashboard-link');
         if (dashboardLink && session.role !== 'user') {
             dashboardLink.style.display = 'inline-block';
-            if (session.role === 'admin') dashboardLink.href = 'dashboard-admin.html';
-            else if (session.role === 'pedagang') dashboardLink.href = 'dashboard-pedagang.html';
+            const prefix = (window.location.pathname.includes('/admin/') || window.location.pathname.includes('/pedagang/')) ? '../' : '';
+            if (session.role === 'admin') dashboardLink.href = prefix + 'admin/index.php';
+            else if (session.role === 'pedagang') dashboardLink.href = prefix + 'pedagang/index.php';
         } else if (dashboardLink && session.role === 'user') {
             dashboardLink.style.display = 'none';
         }
