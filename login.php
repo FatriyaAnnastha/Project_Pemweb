@@ -61,8 +61,13 @@
 
         <!-- FORM LOGIN -->
         <div id="form-login" class="auth-form active">
-            <input type="email" id="email" placeholder="Email" value="user@gmail.com">
-            <input type="password" id="password" placeholder="Password" value="123">
+            <input type="email" id="email" placeholder="Email">
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Password">
+                <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                    <img src="assets/26-show.png" alt="Tampilkan password" style="width:20px; height:20px; vertical-align:middle;">
+                </button>
+            </div>
             <input type="hidden" id="role" value="user">
 
             <div id="hint" style="font-size:11px; opacity:0.8; margin-bottom:10px; line-height:1.5; min-height: 33px; text-align: left;">
@@ -81,15 +86,27 @@
 
             <input type="text" id="r-nama" placeholder="Nama Lengkap">
             <input type="email" id="r-email" placeholder="Email">
-            <input type="password" id="r-pass" placeholder="Password">
-            <input type="password" id="r-pass2" placeholder="Konfirmasi Password">
+            <div class="password-wrapper">
+                <input type="password" id="r-pass" placeholder="Password">
+                <button type="button" class="toggle-password" onclick="togglePassword('r-pass')">
+                    <img src="assets/26-show.png" alt="Tampilkan password" style="width:20px; height:20px; vertical-align:middle;">
+                </button>
+            </div>
+            <div class="password-wrapper">
+                <input type="password" id="r-pass2" placeholder="Konfirmasi Password">
+                <button type="button" class="toggle-password" onclick="togglePassword('r-pass2')">
+                    <img src="assets/26-show.png" alt="Tampilkan password" style="width:20px; height:20px; vertical-align:middle;">
+                </button>
+            </div>
             <input type="hidden" id="r-role" value="user">
 
             <button class="btn-login" onclick="doRegister()">Daftar Sekarang</button>
         </div>
 
-        <div style="margin-top: 14px; font-size:12.5px;">
-            <a href="index.php" style="color: white; text-decoration:none; opacity:0.85; font-weight:600;">← Kembali ke Beranda</a>
+        <div style="margin-top: 14px;">
+            <a href="index.php" class="btn-login" style="text-decoration:none; display:block; text-align:center;">
+                Kembali ke Beranda
+            </a>
         </div>
     </div>
 </div>
@@ -165,6 +182,21 @@ async function doRegister() {
         }, 1500);
     } else {
         showToast('❌ ' + (result.error || 'Gagal registrasi'));
+    }
+}
+
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const btn = input.parentElement.querySelector('.toggle-password');
+    const img = btn.querySelector('img');
+    if (input.type === 'password') {
+        input.type = 'text';
+        img.src = 'assets/27-hide.png';
+        img.alt = 'Sembunyikan password';
+    } else {
+        input.type = 'password';
+        img.src = 'assets/26-show.png';
+        img.alt = 'Tampilkan password';
     }
 }
 </script>

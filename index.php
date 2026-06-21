@@ -215,9 +215,9 @@ async function renderWarung() {
         let chipStatus = '';
         if (statusBuka === true) chipStatus = `<span class="info-chip chip-buka">Buka</span>`;
         else if (statusBuka === false) chipStatus = `<span class="info-chip chip-tutup">Tutup</span>`;
-        let chipJam = (w.jam_buka && w.jam_tutup) ? `<span class="info-chip">🕐 ${w.jam_buka}–${w.jam_tutup}</span>` : '';
-        let chipHari = (w.hari_kerja) ? `<span class="info-chip">📅 ${w.hari_kerja}</span>` : '';
-        let chipWA = (w.wa) ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" class="info-chip chip-wa">💬 WhatsApp</a>` : '';
+        let chipJam = (w.jam_buka && w.jam_tutup) ? `<span class="info-chip"><img src="assets/14-clock.png" style="width:14px;height:auto;vertical-align:middle;"alt="jam"> ${w.jam_buka}–${w.jam_tutup}</span>` : '';
+        let chipHari = (w.hari_kerja) ? `<span class="info-chip"><img src="assets/15-calendar.png" style="width:14px;height:auto;vertical-align:middle;"alt="kalender"> ${w.hari_kerja}</span>` : '';
+        let chipWA = (w.wa) ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" class="info-chip chip-wa"><img src="assets/23-whatsapp.png" style="width:14px;height:auto;vertical-align:middle;"alt="wa"> WhatsApp</a>` : '';
         let previewMenu = '';
         if (w.menu && w.menu.length > 0) {
             const tampil = w.menu.slice(0, 2).map(m => `
@@ -336,7 +336,7 @@ async function bukaDetail(id) {
         ${formReview}
         <div style="display:flex;gap:10px;margin-top:16px;">
             <a href="${lokasiUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none;flex:1;text-align:center;"><img src="assets/9-pointer-on-map.png" class="info" alt="lokasi"> Lihat di Maps</a>
-            ${w.wa ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" class="btn btn-outline" style="text-decoration:none;flex:1;text-align:center;">💬 WhatsApp</a>` : ''}
+            ${w.wa ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" class="btn btn-outline" style="text-decoration:none;flex:1;text-align:center;"><img src="assets/23-whatsapp.png" class="info" alt="chat">  WhatsApp</a>` : ''}
         </div>
     `;
     document.getElementById('modal-detail').classList.add('open');
