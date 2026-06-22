@@ -1,6 +1,3 @@
--- Skema Database CariMakan.ID
--- Gunakan file ini untuk menginisialisasi database di phpMyAdmin / MySQL CLI
-
 CREATE DATABASE IF NOT EXISTS carimakan;
 USE carimakan;
 

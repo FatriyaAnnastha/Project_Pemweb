@@ -71,7 +71,7 @@
             <input type="hidden" id="role" value="user">
 
             <div id="hint" style="font-size:11px; opacity:0.8; margin-bottom:10px; line-height:1.5; min-height: 33px; text-align: left;">
-                Masuk sebagai Pengguna Biasa untuk menjelajahi dan memfavoritkan tempat makan.
+                Masuk sebagai Pengguna untuk menjelajahi dan memfavoritkan tempat makan.
             </div>
 
             <button class="btn-login" onclick="doLogin()">Masuk Ke Akun</button>
@@ -118,7 +118,6 @@ const hints = {
     pedagang: 'Masuk sebagai Pedagang untuk mengelola warung makan dan menu Anda.',
     admin: 'Masuk sebagai Admin untuk mengelola seluruh ekosistem CariMakan.ID.'
 };
-
 function switchForm(type, btn) {
     document.querySelectorAll('.auth-toggle-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');

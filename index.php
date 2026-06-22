@@ -60,10 +60,7 @@ require_once 'backend/session_config.php';
 <section class="hero">
 
     <h1>Temukan Tempat Makan di Sekitarmu!</h1>
-
-    <p>
-        Cari berdasarkan lokasi, harga, dan kategori favorit kamu
-    </p>
+    <p> Cari berdasarkan lokasi, harga, dan kategori favorit kamu</p>
 
     <div class="search-box">
 
@@ -295,7 +292,7 @@ async function bukaDetail(id) {
         </div>
     ` : '<p style="color:#aaa;font-size:13px;">Belum ada menu tersedia.</p>';
     const hariHtml = w.hari_kerja || '–';
-    const waHtml = w.wa ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" style="color:#1565c0;">Chat WhatsApp (${w.wa})</a>` : '–';
+    const waHtml = w.wa ? `<a href="https://wa.me/62${w.wa.replace(/^0/,'')}" target="_blank" style="color:#1565c0;">(${w.wa})</a>` : '–';
     const reviews = w.reviews || [];
     const avgRating = w.rating || 0;
     const reviewListHtml = reviews.length ? reviews.map(rv => `
@@ -357,9 +354,7 @@ async function toggleFavoritDanUpdate(id, nama) {
         showToast('❌ Silakan login terlebih dahulu');
         return;
     }
-
     const sudahFavorit = result.action === 'added';
-
     const btn = document.getElementById('fav-btn-' + id);
 
     if (btn) {
@@ -371,7 +366,6 @@ async function toggleFavoritDanUpdate(id, nama) {
             ? 'Difavoritkan'
             : 'Favorit';
     }
-
     showToast(
         sudahFavorit
             ? `❤️ ${nama} ditambahkan ke favorit`
