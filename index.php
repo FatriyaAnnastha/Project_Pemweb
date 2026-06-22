@@ -166,7 +166,7 @@ function detectLokasi() {
     }
     navigator.geolocation.getCurrentPosition(
         () => { document.getElementById('lokasi-text').textContent = 'Lokasi ditemukan'; },
-        () => { document.getElementById('lokasi-text').textContent = 'Mataram, NTB'; }
+        () => { document.getElementById('lokasi-text').textContent = ''; }
     );
 }
 
@@ -247,13 +247,37 @@ async function renderWarung() {
 }
 
 function renderStars(rating) {
-    let full = Math.floor(rating);
-    let half = rating % 1 >= 0.5 ? 1 : 0;
-    let starHtml = '';
-    for (let i = 0; i < full; i++) starHtml += '⭐';
-    if (half) starHtml += '½⭐';
-    for (let i = 0; i < 5 - full - half; i++) starHtml += '☆';
-    return starHtml;
+
+    const r = parseFloat(rating) || 0;
+    const full = Math.floor(r);
+    const half = (r % 1 >= 0.5) ? 1 : 0;
+    const empty = 5 - full - half;
+
+    const basePath = 'assets/';
+    const starFull = basePath + '8-star-1.png';
+    const starHalf = basePath + '28-half-star.png';
+    const starEmpty = basePath + '29-empty-star.png';
+
+    const imgStyle = 'width:16px;height:16px;display:inline-block;vertical-align:middle;';
+
+    let html = '';
+
+    // Bintang penuh
+    for (let i = 0; i < full; i++) {
+        html += `<img src="${starFull}" alt="★" style="${imgStyle}">`;
+    }
+
+    // Bintang setengah
+    if (half) {
+        html += `<img src="${starHalf}" alt="½★" style="${imgStyle}">`;
+    }
+
+    // Bintang kosong
+    for (let i = 0; i < empty; i++) {
+        html += `<img src="${starEmpty}" alt="☆" style="${imgStyle}">`;
+    }
+
+    return html;
 }
 
 async function submitReview(warungId) {
