@@ -53,30 +53,6 @@ $activePage = 'users';
                 </div>
             </div>
 
-            <div class="card-panel" style="max-width:480px;">
-                <h2>➕ Tambah User Baru</h2>
-                <div class="form-group">
-                    <label>Nama Lengkap</label>
-                    <input type="text" id="u-nama" placeholder="Contoh: Budi Santoso">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="u-email" placeholder="budi@gmail.com">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="u-pass" placeholder="Password minimal 3 karakter">
-                </div>
-                <div class="form-group">
-                    <label>Role</label>
-                    <select id="u-role">
-                        <option value="user">Pengguna Biasa (User)</option>
-                        <option value="pedagang">Pedagang (Merchant)</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary" onclick="tambahUser()">➕ Simpan User</button>
-            </div>
-
         </div>
     </main>
 </div>
@@ -104,24 +80,6 @@ async function renderUsers() {
     `).join('') || '<tr><td colspan="5" style="text-align:center;">Tidak ada pengguna terdaftar</td></tr>';
 }
 
-async function tambahUser() {
-    const nama = document.getElementById('u-nama').value.trim();
-    const email = document.getElementById('u-email').value.trim();
-    const pass = document.getElementById('u-pass').value;
-    const role = document.getElementById('u-role').value;
-    if (!nama || !email || !pass) { showToast('⚠️ Semua field wajib diisi'); return; }
-    if (pass.length < 3) { showToast('⚠️ Password minimal 3 karakter'); return; }
-    const result = await addUserByAdmin(nama, email, pass, role);
-    if (result.success) {
-        showToast('✅ User berhasil ditambahkan');
-        await renderUsers();
-        document.getElementById('u-nama').value = '';
-        document.getElementById('u-email').value = '';
-        document.getElementById('u-pass').value = '';
-    } else {
-        showToast('❌ ' + (result.error || 'Gagal menambahkan user'));
-    }
-}
 
 async function hapusUser(id) {
     if (!confirm('Hapus pengguna ini? Semua data terkait (warung/ulasan) mungkin juga akan terpengaruh.')) return;

@@ -50,7 +50,7 @@ $activePage = 'profil';
                     <input type="text" value="Pedagang / Mitra Kuliner" readonly style="background:#f4f4f4; color:#777; cursor:not-allowed;">
                 </div>
                 <p style="font-size:12px; color:var(--text-muted); margin-top:8px; line-height:1.5;">
-                    💡 Informasi profil akun di atas disinkronkan dengan database pusat. Apabila Anda ingin melakukan perubahan nama atau email, harap hubungi administrator CariMakan.ID.
+                    💡 Informasi profil akun di atas disinkronkan dengan database pusat.
                 </p>
             </div>
 

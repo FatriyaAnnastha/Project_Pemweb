@@ -56,7 +56,7 @@ $activePage = 'laporan';
             </div>
 
             <div class="card-panel">
-                <h2>📋 Log Aktivitas Sistem (Demo)</h2>
+                <h2>📋 Log Aktivitas Sistem</h2>
                 <div id="log-body" style="font-size:13px;line-height:2;color:var(--text-muted);"></div>
             </div>
 
@@ -113,7 +113,9 @@ async function renderLaporan() {
     
     // Render log
     const now = new Date();
-    document.getElementById('log-body').innerHTML = `🟢 ${now.toLocaleString('id')} — Admin login berhasil<br>📋 Berhasil memuat data analitik (${list.length} warung aktif)<br>👥 Sinkronisasi data pengguna selesai`;
+    document.getElementById('log-body').innerHTML = `🟢 ${now.toLocaleString('id')} — Admin login berhasil<br>
+    📋(${list.length} warung aktif)<br>
+    👥 Sinkronisasi data pengguna selesai`;
 }
 
 async function updatePendingBadge() {
