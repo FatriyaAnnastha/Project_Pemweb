@@ -35,6 +35,7 @@ Pengguna dapat melihat detail tempat makan seperti menu, harga, rating, jam oper
 - GitHub
 
 ## 🗂️ Site Map / Menu Structure
+```text
 CariMakan.ID  
 ├── index.php  
 ├── login.php  
@@ -73,6 +74,7 @@ CariMakan.ID
 │  
 └── sitemap/  
     └── *.jpg  
+```
 
 ## 🗄️ DBMS Configuration
 ## DBMS Used : 
@@ -82,7 +84,24 @@ carimakan
 ## Default Port :
 3306
 ## Database Connection Example :
--
+```text
+<?php
+$host = 'localhost';
+$dbname = 'carimakan';
+$username = 'root';
+$password = '';
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
+    exit;
+}
+?>
+```
+
 ## 📋 Table Specifications
 1. Users
 2. Pedagang
