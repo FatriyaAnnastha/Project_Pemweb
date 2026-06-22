@@ -174,6 +174,7 @@ function detectLokasi() {
 }
 
 function handleAuth() {
+    event.preventDefault();
     (async () => {
         const session = await checkSession();
         if (session) logoutUser();
