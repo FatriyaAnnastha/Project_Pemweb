@@ -87,49 +87,49 @@ INSERT INTO users (id, nama, email, password, role, toko) VALUES
 (14, 'Andi Pratama',        'andipratama@gmail.com',    'andi12345',    'user',     NULL);
 
 -- --------------------------------------------------------
--- 2. Data Warung (10 warung, kolom img WAJIB terisi)
+-- 2. Data Warung (rating TIDAK diisi manual, default 0.0)
 -- --------------------------------------------------------
 INSERT INTO warung (id, pedagang_id, nama, kategori, lokasi, harga, deskripsi, lat, lng, jam_buka, jam_tutup, hari_kerja, img, wa, status, rating) VALUES
 
 (1, 2, 'Warung Nasi Bu Dwi', 'Nasi', 'Ampenan, Mataram', 'Murah',
    'Warung nasi campur murah, enak, dan bikin kenyang',
    -8.57900000, 116.07100000, '08:00:00', '14:00:00', 'Sen,Sel,Rab,Kam,Jum',
-   'uploads/warung_nasi_bu_dwi.jpg', '081939392231', 'aktif', 4.0),
+   'uploads/warung_nasi_bu_dwi.jpg', '081939392231', 'aktif', 0.0),
 
 (2, 3, 'Ayam Taliwang Bu Sari', 'Ayam', 'Cakranegara, Mataram', 'Sedang',
    'Ayam Taliwang khas Lombok dengan sambal pedas otentik',
    -8.58320000, 116.12340000, '10:00:00', '21:00:00', 'Sen,Sel,Rab,Kam,Jum,Sab,Min',
-   'uploads/ayam_taliwang_bu_sari.jpg', '081234567801', 'aktif', 4.5),
+   'uploads/ayam_taliwang_bu_sari.jpg', '081234567801', 'aktif', 0.0),
 
 (3, 4, 'Sate Rembiga Pak Herman', 'Sate', 'Rembiga, Mataram', 'Murah',
    'Sate daging sapi bumbu pedas manis khas Rembiga',
    -8.56610000, 116.11470000, '16:00:00', '23:00:00', 'Sen,Sel,Rab,Kam,Jum,Sab',
-   'uploads/sate_rembiga_pak_herman.jpg', '081234567802', 'aktif', 4.7),
+   'uploads/sate_rembiga_pak_herman.jpg', '081234567802', 'aktif', 0.0),
 
 (4, 5, 'Mie Ayam Pak Budi', 'Mie', 'Sandubaya, Mataram', 'Sedang',
    'Mie ayam dengan kuah kaldu gurih dan pangsit renyah',
    -8.60230000, 116.13560000, '10:00:00', '20:00:00', 'Sen,Sel,Rab,Kam,Jum,Sab,Min',
-   'uploads/mie_ayam_pak_budi.jpg', '081234567805', 'aktif', 4.0),
+   'uploads/mie_ayam_pak_budi.jpg', '081234567805', 'aktif', 0.0),
 
 (5, 6, 'Bebek Goreng Pak Made', 'Bebek', 'Selaparang, Mataram', 'Sedang',
    'Bebek goreng renyah dengan sambal matah khas Bali-Lombok',
    -8.57500000, 116.11000000, '11:00:00', '21:00:00', 'Sen,Sel,Rab,Kam,Jum,Sab',
-   'uploads/bebek_goreng_pak_made.jpg', '081234567806', 'aktif', 4.6),
+   'uploads/bebek_goreng_pak_made.jpg', '081234567806', 'aktif', 0.0),
 
 (6, 7, 'Pelecing Ayam Inaq Lale', 'Nasi', 'Pagutan, Mataram', 'Murah',
    'Pelecing ayam pedas khas Lombok dengan sayur urap segar',
    -8.60500000, 116.09500000, '07:00:00', '15:00:00', 'Sen,Sel,Rab,Kam,Jum',
-   'uploads/pelecing_ayam_inaq_lale.jpg', '081234567807', 'aktif', 4.3),
+   'uploads/pelecing_ayam_inaq_lale.jpg', '081234567807', 'aktif', 0.0),
 
 (7, 8, 'Bakso Malang Cak Agus', 'Bakso', 'Sekarbela, Mataram', 'Murah',
    'Bakso urat dan bakso telur dengan kuah kaldu sapi kental',
    -8.61000000, 116.08500000, '09:00:00', '21:00:00', 'Sen,Sel,Rab,Kam,Jum,Sab,Min',
-   'uploads/bakso_malang_cak_agus.jpg', '081234567808', 'aktif', 4.1),
+   'uploads/bakso_malang_cak_agus.jpg', '081234567808', 'aktif', 0.0),
 
 (8, 9, 'Es Campur Bu Komang', 'Minuman', 'Gomong, Mataram', 'Murah',
    'Es campur segar dengan buah-buahan dan sirup aneka rasa',
    -8.59000000, 116.10500000, '10:00:00', '18:00:00', 'Sen,Sel,Rab,Kam,Jum,Sab,Min',
-   'uploads/es_campur_bu_komang.jpg', '081234567809', 'aktif', 3.9),
+   'uploads/es_campur_bu_komang.jpg', '081234567809', 'aktif', 0.0),
 
 (9, 10, 'Soto Ayam Bu Hartini', 'Soto', 'Karang Baru, Mataram', 'Murah',
    'Soto ayam kuah bening gurih dengan suwiran ayam kampung',
@@ -139,10 +139,10 @@ INSERT INTO warung (id, pedagang_id, nama, kategori, lokasi, harga, deskripsi, l
 (10, 11, 'Seafood Pak Joko', 'Seafood', 'Senggigi, Lombok Barat', 'Mahal',
    'Seafood segar bakar dan goreng dengan pemandangan pantai Senggigi',
    -8.48600000, 116.04100000, '15:00:00', '22:00:00', 'Sen,Sel,Rab,Kam,Jum,Sab,Min',
-   'uploads/seafood_pak_joko.jpg', '081234567811', 'aktif', 4.8);
+   'uploads/seafood_pak_joko.jpg', '081234567811', 'aktif', 0.0);
 
 -- --------------------------------------------------------
--- 3. Data Menu (kolom gambar WAJIB terisi)
+-- 3. Data Menu
 -- --------------------------------------------------------
 INSERT INTO menu (id, warung_id, nama, harga, gambar) VALUES
 -- Warung Nasi Bu Dwi
@@ -192,7 +192,7 @@ INSERT INTO menu (id, warung_id, nama, harga, gambar) VALUES
 (26, 10, 'Udang Saus Padang',       40000.00, 'uploads/menu_udang_saus_padang.jpg');
 
 -- --------------------------------------------------------
--- 4. Data Reviews
+-- 4. Data Reviews (sumber asli rating warung)
 -- --------------------------------------------------------
 INSERT INTO reviews (id, warung_id, user_id, rating, komentar, tanggal) VALUES
 (1,  1,  12, 4, 'Nasi campurnya enak, porsi pas',                 '2026-06-13 17:19:23'),
@@ -216,3 +216,59 @@ INSERT INTO favorites (id, user_id, warung_id) VALUES
 (4, 13, 5),
 (5, 14, 7),
 (6, 14, 10);
+
+-- --------------------------------------------------------
+-- 6. Sinkronisasi rating awal berdasarkan data reviews di atas
+--    (jalankan SEKALI setelah semua INSERT di atas selesai)
+-- --------------------------------------------------------
+UPDATE warung w
+SET rating = (
+    SELECT COALESCE(ROUND(AVG(r.rating), 1), 0.0)
+    FROM reviews r
+    WHERE r.warung_id = w.id
+);
+
+-- --------------------------------------------------------
+-- 7. Trigger agar rating warung otomatis ter-update
+--    setiap kali ada review baru / diedit / dihapus
+-- --------------------------------------------------------
+DROP TRIGGER IF EXISTS trg_review_insert;
+DROP TRIGGER IF EXISTS trg_review_update;
+DROP TRIGGER IF EXISTS trg_review_delete;
+
+DELIMITER //
+
+CREATE TRIGGER trg_review_insert
+AFTER INSERT ON reviews
+FOR EACH ROW
+BEGIN
+    UPDATE warung
+    SET rating = (
+        SELECT ROUND(AVG(rating), 1) FROM reviews WHERE warung_id = NEW.warung_id
+    )
+    WHERE id = NEW.warung_id;
+END//
+
+CREATE TRIGGER trg_review_update
+AFTER UPDATE ON reviews
+FOR EACH ROW
+BEGIN
+    UPDATE warung
+    SET rating = (
+        SELECT ROUND(AVG(rating), 1) FROM reviews WHERE warung_id = NEW.warung_id
+    )
+    WHERE id = NEW.warung_id;
+END//
+
+CREATE TRIGGER trg_review_delete
+AFTER DELETE ON reviews
+FOR EACH ROW
+BEGIN
+    UPDATE warung
+    SET rating = (
+        SELECT COALESCE(ROUND(AVG(rating), 1), 0.0) FROM reviews WHERE warung_id = OLD.warung_id
+    )
+    WHERE id = OLD.warung_id;
+END//
+
+DELIMITER ;
