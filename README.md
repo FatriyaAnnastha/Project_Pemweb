@@ -45,14 +45,38 @@ Pengguna dapat melihat detail tempat makan seperti menu, harga, rating, jam oper
 | Azkal   | handle bagian admin          |
 ------------------------------------------
 
-## TECHSTACK USING :
-1. HTML
-2. JAVA
-3. CSS
-4. PHP
-5. XAMPP/SQL
+## 🛠️ TECH STACK
+## Frontend
+- HTML5
+- CSS3
+- JavaScript
+## Backend
+- PHP Native
+## Database
+- MySQL
+## Development Tools
+- Visual Studio Code
+- XAMPP
+- GitHub
 
 ## Site Map
 ![Sitemap](sitemapCariMakan.jpg)
 
-## DBMS
+## DBMS Configuration
+## DBMS Used : 
+MySQL
+## Database Name :
+carimakan
+## Default Port :
+3306
+## Database Connection Example :
+-
+## Table Specifications
+1. Users
+2. Pedagang
+3. Admin
+4. Warung
+5. Favorit
+
+## 🔮Future Development
+-
