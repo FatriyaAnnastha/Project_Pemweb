@@ -15,9 +15,9 @@ Pengguna dapat melihat detail tempat makan seperti menu, harga, rating, jam oper
 ------------------------------------------
 | Nama    | Tanggung Jawab               |
 |---------|------------------------------|
-| Mikroju | Handle bagian pedagang       |
-| Fatriya | Handle bagian pengguna biasa |
-| Azkal   | handle bagian admin          |
+| Mikroju | Backend                      |
+| Fatriya | Frontend                     |
+| Azkal   | Fullstack                    |
 ------------------------------------------
 
 ## 🛠️ TECH STACK
@@ -103,12 +103,64 @@ try {
 ```
 
 ## 📋 Table Specifications
-1. Users
-2. Pedagang
-3. Admin
-4. Warung
-5. Favorit
-6. 
+**1. Users**
+
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---------|---------|---------|---------|
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | ID unik pengguna |
+| `nama` | VARCHAR(100) | NOT NULL | Nama pengguna |
+| `email` | VARCHAR(100) | NOT NULL, UNIQUE | Email pengguna, harus unik |
+| `password` | VARCHAR(255) | NOT NULL | Password yang telah di-hash |
+| `role` | VARCHAR(20) | DEFAULT `'user'` | Peran pengguna (user/admin) |
+| `toko` | VARCHAR(100) | DEFAULT NULL | Nama toko pengguna (opsional) |
+
+**2. Warung**
+
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---------|---------|---------|---------|
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | ID unik warung |
+| `pedagang_id` | INT | NOT NULL, FOREIGN KEY | ID pemilik warung yang terhubung ke tabel `users` |
+| `nama` | VARCHAR(100) | NOT NULL | Nama warung |
+| `kategori` | VARCHAR(50) | NOT NULL | Kategori makanan/minuman |
+| `lokasi` | VARCHAR(100) | NOT NULL | Alamat atau lokasi warung |
+| `harga` | VARCHAR(20) | NOT NULL | Rentang harga |
+| `deskripsi` | TEXT | DEFAULT NULL | Deskripsi warung |
+| `lat` | DECIMAL(10,8) | DEFAULT NULL | Latitude lokasi warung |
+| `lng` | DECIMAL(11,8) | DEFAULT NULL | Longitude lokasi warung |
+| `jam_buka` | TIME | DEFAULT NULL | Jam buka operasional |
+| `jam_tutup` | TIME | DEFAULT NULL | Jam tutup operasional |
+| `hari_kerja` | VARCHAR(100) | DEFAULT NULL | Hari operasional warung |
+| `img` | VARCHAR(255) | DEFAULT NULL | Gambar warung |
+| `wa` | VARCHAR(20) | DEFAULT NULL | Nomor WhatsApp pemilik |
+| `status` | VARCHAR(20) | DEFAULT `'tunggu'` | Status pengajuan warung |
+| `rating` | DECIMAL(2,1) | DEFAULT `0.0` | Rating rata-rata warung |
+
+**3. Menu**
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---------|---------|---------|---------|
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | ID unik menu |
+| `warung_id` | INT | NOT NULL, FOREIGN KEY | ID warung pemilik menu |
+| `nama` | VARCHAR(100) | NOT NULL | Nama menu makanan/minuman |
+| `harga` | DECIMAL(10,2) | NOT NULL | Harga menu |
+| `gambar` | VARCHAR(255) | DEFAULT NULL | Gambar menu |
+
+**4. Reviews**
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---------|---------|---------|---------|
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | ID unik ulasan |
+| `warung_id` | INT | NOT NULL, FOREIGN KEY | ID warung yang diulas |
+| `user_id` | INT | NOT NULL, FOREIGN KEY | ID pengguna yang memberikan ulasan |
+| `rating` | INT | CHECK (1–5) | Nilai rating dari 1 sampai 5 |
+| `komentar` | TEXT | - | Komentar atau ulasan pengguna |
+| `tanggal` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Waktu ulasan dibuat |
+
+**5. Favorit**
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---------|---------|---------|---------|
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | ID unik data favorit |
+| `user_id` | INT | NOT NULL, FOREIGN KEY | ID pengguna yang menyimpan warung favorit |
+| `warung_id` | INT | NOT NULL, FOREIGN KEY | ID warung yang ditandai sebagai favorit |
+
 ## ✨ Fitur Utama
 ### 👤 Untuk Pengguna Biasa
 - Dashboard khusus pengguna
