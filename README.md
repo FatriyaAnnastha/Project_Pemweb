@@ -151,3 +151,22 @@ try {
 
 ## 🎯 Project Goals
 CariMakan.id dikembangkan dengan tujuan untuk menyediakan platform digital yang memudahkan masyarakat dalam menemukan informasi kuliner secara cepat, mudah, dan terpercaya. Selain membantu pengguna mencari tempat makan sesuai kebutuhan dan preferensi mereka, platform ini juga bertujuan untuk mendukung promosi usaha kuliner lokal melalui media digital yang terintegrasi.
+
+## AI Usage Statement
+
+- **Tool:** Claude.AI
+- **Untuk apa:** Membantu integrasi dan implementasi fungsi initLeafletMap pada sistem berbasis Leaflet.
+- **2-3 prompt utama:**  
+  i. *"Bantu integrasikan fungsi initLeafletMap ke dalam aplikasi web agar peta dapat ditampilkan menggunakan Leaflet, termasuk inisialisasi peta, penambahan marker, dan pengaturan koordinat"*  
+  ii. *"Periksa dan perbaiki kode integrasi Leaflet yang menggunakan fungsi initLeafletMap, serta berikan solusi untuk error atau masalah yang menyebabkan peta tidak tampil dengan benar"*
+- **Bagian Output AI yang dipakai:**  
+  i. *Arahan peletakan dan pengimplementasian code*
+---
+- **Tool:** Claude.AI
+- **Untuk apa:** Membantu implementasi fitur toggle password agar pengguna dapat menampilkan atau menyembunyikan kata sandi pada form login dan registrasi.
+- **2–3 prompt utama:**
+i. *"Bantu membuat fitur toggle show/hide password menggunakan JavaScript pada form login dan registrasi, lengkap dengan ikon mata yang dapat diklik."**
+ii. *"Periksa dan perbaiki kode toggle password yang tidak berfungsi dengan benar, serta pastikan kompatibel dengan HTML, CSS, dan JavaScript yang digunakan."**
+- **Bagian Output AI yang dipakai:**  
+  *i. Arahan peletakan dan pengimplementasian code*
+```
