@@ -35,6 +35,12 @@ Pengguna dapat melihat detail tempat makan seperti menu, harga, rating, jam oper
 - GitHub
 
 ## 🗂️ Site Map / Menu Structure
+### - Site Map
+
+<img src="sitemap/sitemap%20CariMakan.png" alt="Sitemap CariMakan" width="800">
+
+### - Menu Structure
+
 ```text
 CariMakan.ID  
 ├── index.php  
