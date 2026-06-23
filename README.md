@@ -152,6 +152,25 @@ try {
 ## 🎯 Project Goals
 CariMakan.id dikembangkan dengan tujuan untuk menyediakan platform digital yang memudahkan masyarakat dalam menemukan informasi kuliner secara cepat, mudah, dan terpercaya. Selain membantu pengguna mencari tempat makan sesuai kebutuhan dan preferensi mereka, platform ini juga bertujuan untuk mendukung promosi usaha kuliner lokal melalui media digital yang terintegrasi.
 
+## Bug Log
+- **Gejala 1 - perbaikan session()**
+- **Bug 1**
+<img width="557" height="167" alt="image" src="https://github.com/user-attachments/assets/f0f27375-eb14-42c7-ae8f-070cb148084f" />
+Bug yang dimana saat log out di beranda biasa user sessionnya tidak langsung hilang
+- **Solusi Bug 1**
+<img width="497" height="200" alt="image" src="https://github.com/user-attachments/assets/79122b84-30da-46c2-97aa-995503d94581" />  
+solusi yang ditemukan menambahkan event dan prevent default Ini memastikan request logout ke backend selesai dulu sebelum browser pindah halaman, jadi session di server dijamin sudah terhapus sebelum redirect terjadi.
+
+---
+
+- **Gejala 2 - rating**
+- **Bug 2**
+<img width="502" height="105" alt="image" src="https://github.com/user-attachments/assets/b20ea3b7-147c-4ab5-99ba-ac2ea0b6f83a" />
+Bug nya dan di beranda ratingnya tidak menampilkan bintang pada rating.
+- **Solusi**
+<img width="600" height="112" alt="image" src="https://github.com/user-attachments/assets/80103d43-c6ed-4705-b363-f028e290b290" />
+Penyelesaian ternyata assets sudah diwakilkan oleh basepath.
+
 ## AI Usage Statement
 
 - **Tool:** Claude.AI
