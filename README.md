@@ -12,13 +12,13 @@ CariMakan adalah website kuliner interaktif yang membantu pengguna menemukan tem
 Pengguna dapat melihat detail tempat makan seperti menu, harga, rating, jam operasional, lokasi pada peta, hingga ulasan dari pengguna lain. Selain itu, platform ini juga mendukung peran berbeda seperti User, Pedagang, Reviewer, dan Admin untuk menciptakan ekosistem kuliner digital yang terintegrasi.
 
 ## 👥 Tim Pengembang
-------------------------------------------
-| Nama    | Tanggung Jawab               |
-|---------|------------------------------|
-| Mikroju | Backend                      |
-| Fatriya | Frontend                     |
-| Azkal   | Fullstack                    |
-------------------------------------------
+--------------------------------------------------------------
+| Nama    |                Kontribusi                        |
+|---------|--------------------------------------------------|
+| Mikroju | Full Stack (Fokus untuk bagian pedagang)         |
+| Fatriya | Full Stack (Fokus untuk bagian pengguna biasa    |
+| Azkal   | Full Stack (Fokus untuk bagian Admin)            |
+--------------------------------------------------------------
 
 ## 🛠️ TECH STACK
 ## Frontend
