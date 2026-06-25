@@ -258,4 +258,8 @@ i. *"Bantu membuat fitur toggle show/hide password menggunakan JavaScript pada f
 ii. *"Periksa dan perbaiki kode toggle password yang tidak berfungsi dengan benar, serta pastikan kompatibel dengan HTML, CSS, dan JavaScript yang digunakan."**
 - **Bagian Output AI yang dipakai:**  
   *i. Arahan peletakan dan pengimplementasian code*
-```
+
+## Tampilan Website
+- Halaman Login
+- Dashboard Admin
+- Dashboard Pedagang
