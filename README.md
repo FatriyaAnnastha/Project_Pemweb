@@ -37,7 +37,7 @@ Pengguna dapat melihat detail tempat makan seperti menu, harga, rating, jam oper
 ## 🗂️ Site Map / Menu Structure
 ### - Site Map
 
-<img src="sitemap/sitemap%20CariMakan.png" alt="Sitemap CariMakan" width="800">
+<img src="sitemap/sitemap%20CariMakan.jpg" alt="Sitemap CariMakan" width="800">
 
 ### - Menu Structure
 
@@ -261,5 +261,14 @@ ii. *"Periksa dan perbaiki kode toggle password yang tidak berfungsi dengan bena
 
 ## Tampilan Website
 - Halaman Login
+  
+  <img src="sitemap/Halaman login dan daftar.jpeg" alt="Sitemap CariMakan" width="800">
+
 - Dashboard Admin
+  
+  <img src="sitemap/Dashboard Admin.jpeg" alt="Sitemap CariMakan" width="800">
+  
 - Dashboard Pedagang
+  
+  <img src="sitemap/Dashboard Pedagang.jpeg" alt="Sitemap CariMakan" width="800">
+  
